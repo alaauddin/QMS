@@ -44,10 +44,10 @@ echo "🚀 Starting QMS Server on port 8000..."
 fuser -k 8000/tcp || true
 
 # Use nohup to keep it running
-nohup python manage.py runserver 0.0.0.0:8000 > qms_server.log 2>&1 &
+nohup python manage.py runserver 0.0.0.0:8088 > qms_server.log 2>&1 &
 
 echo "------------------------------------------------"
 echo "✅ DEPLOYMENT COMPLETE!"
-echo "QMS is now running at http://104.207.66.129:8000"
+echo "QMS is now running at http://104.207.66.129:8088"
 echo "Check logs with: tail -f qms_server.log"
 echo "------------------------------------------------"
