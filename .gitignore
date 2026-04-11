@@ -14,7 +14,6 @@ var/
 media/
 static_collected/
 staticfiles/
-db.sqlite3
 .env
 
 # React Native / Expo
