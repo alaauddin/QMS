@@ -36,7 +36,7 @@ echo "🗄️  Running migrations..."
 python manage.py migrate
 
 echo "🔊 Warming up audio cache (100 tokens)..."
-python manage.py warm_audio_cache --tokens 100 --counters 10
+python manage.py warm_audio_cache --tokens 10 --counters 10
 
 # 6. Deployment (Run in background)
 echo "🚀 Starting QMS Server on port 8000..."
