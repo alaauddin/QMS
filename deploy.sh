@@ -41,7 +41,7 @@ python manage.py warm_audio_cache --tokens 10 --counters 10
 # 6. Deployment (Run in background)
 echo "🚀 Starting QMS Server on port 8000..."
 # Kill any existing process on port 8000 to avoid conflicts
-fuser -k 8000/tcp || true
+fuser -k 8088/tcp || true
 
 # Use nohup to keep it running
 nohup python manage.py runserver 0.0.0.0:8088 > qms_server.log 2>&1 &
