@@ -1,0 +1,192 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Select Counter" %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: {{ system_config.primary_color|default:"#4e73df" }};
+            --secondary: {{ system_config.secondary_color|default:"#2e59d9" }};
+            --accent: {{ system_config.accent_color|default:"#f8f9fc" }};
+        }
+        body { font-family: 'Cairo', sans-serif; background: var(--accent); min-height: 100vh; }
+        .selection-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            padding: 3rem;
+            margin-top: 5rem;
+        }
+        .counter-btn {
+            border: 2px solid #eef2f7;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            width: 100%;
+        }
+        .counter-btn:hover:not(.disabled) {
+            border-color: var(--primary);
+            background: #f8f9fc;
+            transform: translateY(-3px);
+        }
+        .counter-btn.active {
+            border-color: var(--primary);
+            background: rgba(78, 115, 223, 0.05);
+        }
+        .counter-btn.disabled {
+            background: #f1f3f5;
+            color: #adb5bd;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .service-title {
+            border-inline-start: 5px solid var(--primary);
+            padding-inline-start: 1rem;
+            margin-bottom: 2rem;
+            font-weight: 700;
+        }
+        .btn-primary {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        .btn-primary:hover, .btn-primary:active, .btn-primary:focus {
+            background: var(--secondary);
+            border-color: var(--secondary);
+        }
+        .text-primary { color: var(--primary) !important; }
+        .border-primary { border-color: var(--primary) !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="selection-card mx-auto" style="max-width: 900px;">
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <h1 class="fw-bold text-primary">{% trans "Choose Your Counter" %}</h1>
+                <div class="text-muted">{% trans "Welcome" %}, {{ request.user.username }}</div>
+            </div>
+
+            <form method="post" id="selectionForm">
+                {% csrf_token %}
+                <div id="hiddenInputs"></div>
+
+                <div class="row">
+                    <!-- Column 1: Counters -->
+                    <div class="col-md-6 border-end">
+                        <h3 class="service-title border-primary">{% trans "1. Select Counters" %}</h3>
+                        <div class="row g-3">
+                            {% for counter in all_counters %}
+                            <div class="col-6">
+                                <div class="counter-btn {% if counter.id in my_active_counters %}active{% elif counter.id in active_counters %}disabled{% endif %}" 
+                                     data-id="{{ counter.id }}" 
+                                     data-type="counter"
+                                     onclick="{% if counter.id not in active_counters %}toggleItem(this, 'counter_ids'){% endif %}">
+                                    <div class="fw-bold">{% trans "Counter" %} {{ counter.number }}</div>
+                                    <div class="small">
+                                        {% if counter.id in my_active_counters %}{% trans "Selected" %}
+                                        {% elif counter.id in active_counters %}{% trans "Taken" %}
+                                        {% else %}{% trans "Available" %}{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Services -->
+                    <div class="col-md-6 ps-md-4">
+                        <h3 class="service-title border-success">{% trans "2. Select Services" %}</h3>
+                        <div class="row g-3">
+                            {% for service in services %}
+                            <div class="col-12">
+                                <div class="counter-btn {% if service.id in my_active_services %}active{% endif %}" 
+                                     data-id="{{ service.id }}" 
+                                     data-type="service"
+                                     onclick="toggleItem(this, 'service_ids')">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="fw-bold">{{ service.name }}</span>
+                                        <span class="badge bg-light text-dark fw-normal">{{ service.prefix }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid mt-5">
+                    <button type="submit" class="btn btn-primary btn-lg py-3 rounded-pill fw-bold" id="submitBtn" disabled>
+                        {% trans "Start Providing Services" %}
+                    </button>
+                    <a href="{% url 'qms_core:logout' %}" class="btn btn-link mt-3 text-muted">{% trans "Logout" %}</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let selectedCounters = new Set();
+        let selectedServices = new Set();
+        
+        // Initial load
+        document.querySelectorAll('.counter-btn.active').forEach(btn => {
+            if (btn.dataset.type === 'counter') selectedCounters.add(btn.dataset.id);
+            else selectedServices.add(btn.dataset.id);
+        });
+        updateHiddenInputs();
+
+        function toggleItem(element, name) {
+            const id = element.dataset.id;
+            
+            if (name === 'counter_ids') {
+                // Single selection for counters
+                if (selectedCounters.has(id)) {
+                    selectedCounters.delete(id);
+                    element.classList.remove('active');
+                } else {
+                    // Clear previous selection
+                    document.querySelectorAll('.counter-btn[data-type="counter"]').forEach(btn => btn.classList.remove('active'));
+                    selectedCounters.clear();
+                    selectedCounters.add(id);
+                    element.classList.add('active');
+                }
+            } else {
+                // Multiple selection for services
+                if (selectedServices.has(id)) {
+                    selectedServices.delete(id);
+                    element.classList.remove('active');
+                } else {
+                    selectedServices.add(id);
+                    element.classList.add('active');
+                }
+            }
+            updateHiddenInputs();
+        }
+
+        function updateHiddenInputs() {
+            const container = document.getElementById('hiddenInputs');
+            container.innerHTML = '';
+            
+            selectedCounters.forEach(id => {
+                const input = document.createElement('input');
+                input.type = 'hidden'; input.name = 'counter_ids'; input.value = id;
+                container.appendChild(input);
+            });
+            
+            selectedServices.forEach(id => {
+                const input = document.createElement('input');
+                input.type = 'hidden'; input.name = 'service_ids'; input.value = id;
+                container.appendChild(input);
+            });
+            
+            document.getElementById('submitBtn').disabled = (selectedCounters.size === 0 || selectedServices.size === 0);
+        }
+    </script>
+</body>
+</html>

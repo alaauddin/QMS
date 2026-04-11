@@ -1,0 +1,246 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Screen Display" %}</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    <!-- Google Fonts -->
+    <!-- Google Fonts: Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: {{ system_config.secondary_color|default:"#0f172a" }};
+            --accent-color: {{ system_config.primary_color|default:"#38bdf8" }};
+            --text-main: {{ system_config.accent_color|default:"#f8fafc" }};
+            --highlight-glow: {{ system_config.primary_color|default:"rgba(56, 189, 248, 0.5)" }};
+        }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--primary-bg);
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(56, 189, 248, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(30, 58, 138, 0.3) 0%, transparent 50%);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin: 0;
+        }
+        .screen-canvas {
+            width: 90vw;
+            height: 85vh;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-evenly;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        .header-label {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            text-shadow: 0 0 20px var(--highlight-glow);
+            opacity: 0.8;
+        }
+        .token-container {
+            position: relative;
+        }
+        .token-number {
+            font-size: 28rem;
+            font-weight: 900;
+            line-height: 0.8;
+            margin: 0;
+            background: linear-gradient(180deg, #fff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 40px var(--highlight-glow));
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .token-number.new-token {
+            animation: tokenPop 0.8s ease-out;
+        }
+        @keyframes tokenPop {
+            0% { transform: scale(0.5); opacity: 0; filter: brightness(3) blur(10px); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; filter: brightness(1) blur(0); }
+        }
+        .footer-info {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            background: rgba(56, 189, 248, 0.1);
+            padding: 1.5rem 4rem;
+            border-radius: 100px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+        .counter-badge {
+            background: var(--accent-color);
+            color: var(--primary-bg);
+            padding: 0.5rem 2rem;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 2.5rem;
+        }
+        .instruction-text {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid h-100 p-4">
+        <div class="row h-100 g-4">
+            <!-- Left Side: Queue Display -->
+            <div class="{% if ads %}col-md-9{% else %}col-md-12{% endif %} h-100 d-flex align-items-center justify-content-center">
+                <div class="screen-canvas w-100 h-100 d-flex flex-column align-items-center justify-content-evenly p-5">
+                    <div id="status-indicator" style="position: absolute; top: 30px; right: 30px; width: 20px; height: 20px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 15px #ef4444;"></div>
+                    
+                    {% if system_config.logo %}
+                        <img src="{{ system_config.logo.url }}" alt="{{ system_config.system_name }}" style="max-height: 80px; position: absolute; top: 30px; left: 50%; transform: translateX(-50%); opacity: 0.8;">
+                    {% endif %}
+
+                    <div class="header-label text-uppercase opacity-75">{% trans "Current Token" %}</div>
+                    
+                    <div class="token-container">
+                        <h1 id="token-display" class="token-number" style="font-size: 15rem; font-weight: 900; margin: 0; color: var(--accent-color); text-shadow: 0 0 50px var(--highlight-glow);">--</h1>
+                    </div>
+
+                    <div class="footer-info text-center">
+                        <div class="instruction-text fs-2 opacity-50 mb-2">{% trans "Please proceed to Counter" %}</div>
+                        <div id="counter-badge" class="counter-badge bg-primary px-5 py-2 rounded-pill display-3 fw-bold shadow-lg">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Ads Sidebar -->
+            {% if ads %}
+            <div class="col-md-3 h-100">
+                <div class="card h-100 border-0 rounded-5 shadow-lg overflow-hidden" style="background: rgba(255,255,255,0.05); backdrop-filter: blur(20px);">
+                    <div id="publicAdCarousel" class="carousel slide h-100 carousel-fade" data-bs-ride="carousel">
+                        <div class="carousel-inner h-100">
+                            {% for ad in ads %}
+                            <div class="carousel-item h-100 {% if forloop.first %}active{% endif %}" data-bs-interval="5000">
+                                <img src="{{ ad.image.url }}" class="d-block w-100 h-100" alt="{{ ad.title }}" style="object-fit: cover;">
+                                <div class="carousel-caption d-none d-md-block" style="background: linear-gradient(transparent, rgba(0,0,0,0.8)); bottom: 0; left: 0; right: 0; padding: 2rem;">
+                                    <h5 class="fw-bold fs-3">{{ ad.title }}</h5>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Audio Permission Overlay -->
+    <div id="audio-overlay" onclick="enableAudio()" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 9999; cursor: pointer;">
+        <div class="text-center p-5 rounded-5 border border-primary bg-dark shadow-lg">
+            <h2 class="text-primary mb-4 fw-bold">{% trans "Ready for Voice Announcements" %}</h2>
+            <p class="text-white opacity-75 mb-5">{% trans "Click anywhere to enable voice calls" %}</p>
+            <div class="btn btn-primary btn-lg rounded-pill px-5 fw-bold">{% trans "Start System" %}</div>
+        </div>
+    </div>
+
+    <script>
+        const counterIds = [{% for counter in counters %}"{{ counter.id }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
+        const activeConnections = new Set();
+        
+        function toArDigits(str) {
+            return str.toString().replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+        }
+
+        function playBase64Audio(base64Data) {
+            if (!base64Data) return;
+            const audioSrc = "data:audio/mp3;base64," + base64Data;
+            const audio = new Audio(audioSrc);
+            audio.play().catch(e => console.error("Audio play failed:", e));
+        }
+
+        function updateDisplay(tokenText, counterNum) {
+            const tokenDisplay = document.getElementById('token-display');
+            tokenDisplay.innerText = toArDigits(tokenText);
+            tokenDisplay.classList.remove('new-token');
+            void tokenDisplay.offsetWidth; 
+            tokenDisplay.classList.add('new-token');
+
+            document.getElementById('counter-badge').innerText = toArDigits(counterNum.toString());
+        }
+
+        function connectCounter(id) {
+            if (activeConnections.has(id)) return;
+
+            const wsUrl = (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + '/ws/counter/' + id + '/';
+            const ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                console.log("Joined Counter Group: " + id);
+                activeConnections.add(id);
+                updateStatus(true);
+            };
+
+            ws.onmessage = function(e) {
+                const data = JSON.parse(e.data);
+                if (data.type === 'token_called') {
+                    updateDisplay(data.service + data.token, data.counter);
+                    if (data.audio) playBase64Audio(data.audio);
+                } else if (data.type === 'token_audio') {
+                    playBase64Audio(data.audio);
+                } else if (data.type === 'token_cleared') {
+                    updateDisplay("--", "--");
+                }
+            };
+
+            ws.onclose = () => {
+                activeConnections.delete(id);
+                updateStatus(activeConnections.size > 0);
+                setTimeout(() => connectCounter(id), 5000);
+            };
+
+            ws.onerror = () => ws.close();
+        }
+
+        function connectGlobal() {
+            if (counterIds.length > 0) {
+                // We just need ONE connection to join 'queue_updates'
+                connectCounter(counterIds[0]);
+            } else {
+                console.error("No counters available to establish global connection.");
+            }
+        }
+
+        connectGlobal();
+
+        function updateStatus(connected) {
+            const indicator = document.getElementById('status-indicator');
+            if (connected) {
+                indicator.style.background = '#22c55e';
+                indicator.style.boxShadow = '0 0 10px #22c55e';
+            } else {
+                indicator.style.background = '#ef4444';
+                indicator.style.boxShadow = '0 0 10px #ef4444';
+            }
+        }
+
+        function enableAudio() {
+            document.getElementById('audio-overlay').style.display = 'none';
+            // Simple interaction to unlock audio
+            new Audio().play().catch(() => {});
+        }
+
+        connectAll();
+    </script>
+    </script>
+</body>
+</html>

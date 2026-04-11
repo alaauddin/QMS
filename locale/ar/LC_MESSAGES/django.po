@@ -1,0 +1,337 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-27 02:01+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+#: qms_core/models.py:6
+msgid "Service Name"
+msgstr "اسم الخدمة"
+
+#: qms_core/models.py:7
+msgid "Token Prefix"
+msgstr "بادئة التذكرة"
+
+#: qms_core/models.py:13 qms_core/models.py:65
+#: qms_core/templates/qms_core/admin_dashboard.html:86
+#: qms_core/templates/qms_core/counter_dashboard.html:60
+#: qms_core/templates/qms_core/token_print.html:33
+msgid "Service"
+msgstr "الخدمة"
+
+#: qms_core/models.py:14
+msgid "Services"
+msgstr "الخدمات"
+
+#: qms_core/models.py:18
+msgid "Counter Number"
+msgstr "رقم الكاونتر"
+
+#: qms_core/models.py:19 qms_core/templates/qms_core/admin_dashboard.html:34
+msgid "Assigned Service"
+msgstr "الخدمة المخصصة"
+
+#: qms_core/models.py:25 qms_core/models.py:31 qms_core/models.py:74
+#: qms_core/models.py:88 qms_core/templates/qms_core/admin_dashboard.html:34
+#: qms_core/templates/qms_core/admin_dashboard.html:56
+#: qms_core/templates/qms_core/admin_dashboard.html:86
+#: qms_core/templates/qms_core/counter_dashboard.html:59
+#: qms_core/templates/qms_core/select_counter.html:74
+#: qms_core/templates/qms_core/select_counter.html:82
+msgid "Counter"
+msgstr "كاونتر"
+
+#: qms_core/models.py:26
+msgid "Counters"
+msgstr "الكاونترات"
+
+#: qms_core/models.py:30 qms_core/templates/qms_core/admin_dashboard.html:56
+msgid "Operator"
+msgstr "الموظف"
+
+#: qms_core/models.py:32
+msgid "Shift Start"
+msgstr "بداية الوردية"
+
+#: qms_core/models.py:33
+msgid "Shift End"
+msgstr "نهاية الوردية"
+
+#: qms_core/models.py:34 qms_core/models.py:90
+msgid "Is Active"
+msgstr "نشط؟"
+
+#: qms_core/models.py:38
+msgid "Counter Assignment"
+msgstr "تخصيص الكاونتر"
+
+#: qms_core/models.py:39
+msgid "Counter Assignments"
+msgstr "تخصيصات الكاونتر"
+
+#: qms_core/models.py:43 qms_core/templates/qms_core/admin_dashboard.html:65
+msgid "Active"
+msgstr "نشط"
+
+#: qms_core/models.py:43 qms_core/templates/qms_core/admin_dashboard.html:67
+msgid "Inactive"
+msgstr "غير نشط"
+
+#: qms_core/models.py:64
+msgid "Token Number"
+msgstr "رقم التذكرة"
+
+#: qms_core/models.py:68
+msgid "Waiting"
+msgstr "في الانتظار"
+
+#: qms_core/models.py:69
+msgid "Called"
+msgstr "تم الاستدعاء"
+
+#: qms_core/models.py:70
+msgid "Done"
+msgstr "تم الانتهاء"
+
+#: qms_core/models.py:71
+msgid "Skipped"
+msgstr "تم التخطي"
+
+#: qms_core/models.py:73 qms_core/templates/qms_core/admin_dashboard.html:56
+#: qms_core/templates/qms_core/admin_dashboard.html:86
+msgid "Status"
+msgstr "الحالة"
+
+#: qms_core/models.py:76
+msgid "Called At"
+msgstr "وقت الاستدعاء"
+
+#: qms_core/models.py:82 qms_core/templates/qms_core/admin_dashboard.html:86
+msgid "Token"
+msgstr ""
+
+#: qms_core/models.py:83
+msgid "Tokens"
+msgstr "التذاكر"
+
+#: qms_core/models.py:87
+msgid "Screen Name"
+msgstr ""
+
+#: qms_core/models.py:89
+msgid "Device Token"
+msgstr "رمز الجهاز"
+
+#: qms_core/models.py:96
+msgid "Screen"
+msgstr ""
+
+#: qms_core/models.py:97
+msgid "Screens"
+msgstr "الشاشات"
+
+#: qms_core/templates/qms_core/admin_dashboard.html:6
+msgid "Management Dashboard"
+msgstr ""
+
+#: qms_core/templates/qms_core/admin_dashboard.html:24
+msgid "QMS Management Dashboard"
+msgstr "لوحة إدارة نظام الانتظار"
+
+#: qms_core/templates/qms_core/admin_dashboard.html:30
+msgid "Counters Overview"
+msgstr ""
+
+#: qms_core/templates/qms_core/admin_dashboard.html:52
+msgid "Operator Status"
+msgstr "حالة الموظفين"
+
+#: qms_core/templates/qms_core/admin_dashboard.html:56
+msgid "Shift"
+msgstr ""
+
+#: qms_core/templates/qms_core/admin_dashboard.html:82
+msgid "Live Queue (Last 50 Tokens)"
+msgstr "قائمة الانتظار المباشرة (آخر 50 تذكرة)"
+
+#: qms_core/templates/qms_core/admin_dashboard.html:86
+msgid "Time"
+msgstr ""
+
+#: qms_core/templates/qms_core/counter_dashboard.html:7
+msgid "Operator Dashboard"
+msgstr "لوحة تحكم الموظف"
+
+#: qms_core/templates/qms_core/counter_dashboard.html:62
+#: qms_core/templates/qms_core/screen.html:62
+msgid "Current Token"
+msgstr "التذكرة الحالية"
+
+#: qms_core/templates/qms_core/counter_dashboard.html:65
+msgid "Call Next"
+msgstr "استدعاء التالي"
+
+#: qms_core/templates/qms_core/counter_dashboard.html:100
+msgid "Connection error"
+msgstr ""
+
+#: qms_core/templates/qms_core/kiosk.html:7
+msgid "Customer Kiosk"
+msgstr "جهاز الخدمة الذاتية"
+
+#: qms_core/templates/qms_core/kiosk.html:7
+msgid "QMS"
+msgstr ""
+
+#: qms_core/templates/qms_core/kiosk.html:47
+#: qms_core/templates/qms_core/select_counter.html:57
+msgid "Welcome"
+msgstr "أهلاً بك"
+
+#: qms_core/templates/qms_core/kiosk.html:48
+msgid "Please select a service"
+msgstr ""
+
+#: qms_core/templates/qms_core/login.html:7
+msgid "QMS Operator Login"
+msgstr "دخول موظفي نظام الانتظار"
+
+#: qms_core/templates/qms_core/login.html:84
+msgid "Login"
+msgstr ""
+
+#: qms_core/templates/qms_core/login.html:85
+msgid "Standard Queue Management"
+msgstr "نظام إدارة طوابير الانتظار الموحد"
+
+#: qms_core/templates/qms_core/login.html:91
+msgid "Username"
+msgstr ""
+
+#: qms_core/templates/qms_core/login.html:94
+msgid "Password"
+msgstr "كلمة المرور"
+
+#: qms_core/templates/qms_core/login.html:99
+msgid "The username or password you entered is incorrect."
+msgstr ""
+
+#: qms_core/templates/qms_core/login.html:105
+msgid "Sign In"
+msgstr "تسجيل الدخول"
+
+#: qms_core/templates/qms_core/no_assignment.html:6
+msgid "No Assignment"
+msgstr ""
+
+#: qms_core/templates/qms_core/no_assignment.html:11
+msgid "No Active Counter Assignment"
+msgstr "لا يوجد تخصيص كاونتر نشط"
+
+#: qms_core/templates/qms_core/no_assignment.html:12
+msgid "Please contact your administrator to assign you to a counter."
+msgstr ""
+
+#: qms_core/templates/qms_core/no_assignment.html:13
+#: qms_core/templates/qms_core/select_counter.html:99
+msgid "Go to Admin"
+msgstr "الذهاب إلى الإدارة"
+
+#: qms_core/templates/qms_core/no_permission.html:6
+#: qms_core/templates/qms_core/no_permission.html:11
+msgid "Permission Denied"
+msgstr ""
+
+#: qms_core/templates/qms_core/no_permission.html:12
+msgid "You do not have the necessary permissions to access this dashboard."
+msgstr "ليس لديك الصلاحيات الكافية للوصول إلى هذه لوحة التحكم."
+
+#: qms_core/templates/qms_core/no_permission.html:13
+msgid "Go to Counter Dashboard"
+msgstr ""
+
+#: qms_core/templates/qms_core/screen.html:7
+msgid "Screen Display"
+msgstr "شاشة العرض"
+
+#: qms_core/templates/qms_core/screen.html:65
+msgid "Please proceed to Counter"
+msgstr "يرجى التوجه إلى الكاونتر"
+
+#: qms_core/templates/qms_core/select_counter.html:7
+msgid "Select Counter"
+msgstr "اختيار كاونتر"
+
+#: qms_core/templates/qms_core/select_counter.html:56
+msgid "Choose Your Counter"
+msgstr ""
+
+#: qms_core/templates/qms_core/select_counter.html:76
+msgid "You are here"
+msgstr "أنت هنا"
+
+#: qms_core/templates/qms_core/select_counter.html:85
+msgid "Taken by other"
+msgstr ""
+
+#: qms_core/templates/qms_core/select_counter.html:87
+msgid "Available"
+msgstr "متاح"
+
+#: qms_core/templates/qms_core/select_counter.html:98
+msgid "No services or counters configured yet."
+msgstr ""
+
+#: qms_core/templates/qms_core/select_counter.html:105
+msgid "Start Session"
+msgstr "بدء الدوام"
+
+#: qms_core/templates/qms_core/select_counter.html:107
+msgid "Logout"
+msgstr ""
+
+#: qms_core/templates/qms_core/token_print.html:6
+msgid "Your Ticket"
+msgstr "تذكرتك"
+
+#: qms_core/templates/qms_core/token_print.html:35
+msgid "Your Ticket Number"
+msgstr ""
+
+#: qms_core/templates/qms_core/token_print.html:37
+msgid "Date"
+msgstr "التاريخ"
+
+#: qms_core/templates/qms_core/token_print.html:39
+msgid "Thank you for waiting"
+msgstr ""
+
+#: qms_core/templates/qms_core/token_print.html:42
+msgid "Print Again"
+msgstr "طباعة مرة أخرى"
+
+#: qms_core/templates/qms_core/token_print.html:44
+msgid "Back to Kiosk"
+msgstr ""
+
+#: qms_core/views.py:78
+msgid "No active counter assignment found."
+msgstr "لم يتم العثور على تخصيص كاونتر نشط."
+
+#: qms_core/views.py:106
+msgid "No tokens waiting for this service."
+msgstr ""

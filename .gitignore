@@ -1,0 +1,32 @@
+# Python / Django
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+pip-log.txt
+pip-delete-this-directory.txt
+library.py
+.venv/
+var/
+media/
+static_collected/
+staticfiles/
+db.sqlite3
+.env
+
+# React Native / Expo
+node_modules/
+.expo/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+android/
+ios/
+
+# MacOS / OS
+.DS_Store
+Thumbs.db
