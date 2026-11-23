@@ -52,12 +52,18 @@
             height: 6px;
             background: linear-gradient(90deg, var(--brand-secondary), var(--brand-primary));
         }
-        .screen-logo {
-            max-height: 64px;
-            max-width: 180px;
+        .screen-logo-frame {
             position: absolute;
             top: 28px;
             left: 32px;
+            padding: 6px 12px;
+            background: #f8faf9;
+            border-radius: 14px;
+        }
+        .screen-logo {
+            display: block;
+            max-height: 64px;
+            max-width: 180px;
             object-fit: contain;
         }
         .header-label {
@@ -141,7 +147,7 @@
                     <div id="status-indicator" style="position: absolute; top: 30px; right: 30px; width: 20px; height: 20px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 15px #ef4444;"></div>
                     
                     {% if system_config.logo %}
-                        <img src="{{ system_config.logo.url }}" alt="{{ system_config.system_name }}" class="screen-logo">
+                        <div class="screen-logo-frame"><img src="{{ system_config.logo.url }}" alt="{{ system_config.system_name }}" class="screen-logo"></div>
                     {% endif %}
 
                     <div class="header-label">{% trans "Current Token" %}</div>
