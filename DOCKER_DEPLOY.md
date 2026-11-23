@@ -24,6 +24,14 @@ ss -ltnp | grep ':8099 ' || true
 
 Edit `.env`: replace `QMS_SECRET_KEY` with the generated value, set `QMS_ALLOWED_HOSTS` to the server IP or domain, and set `QMS_UID` and `QMS_GID` to the outputs of `id -u` and `id -g`. Set `QMS_PORT` to another unused port if 8099 is occupied. Keep `.env` private.
 
+If you already pulled the commit that removed `db.sqlite3`, first stop the old QMS process (identify it with `pgrep -af 'manage.py runserver'`; stop only those QMS PIDs). Restore the newest database backup you have to `db.sqlite3`. If there is no backup, the last database tracked by Git can be recovered with:
+
+```bash
+git show e62f5dd:db.sqlite3 > db.sqlite3
+```
+
+That Git copy contains only data present in that commit. Check it before relying on it if the server has had newer data.
+
 Copy the current QMS data into the isolated Docker data directory:
 
 ```bash
