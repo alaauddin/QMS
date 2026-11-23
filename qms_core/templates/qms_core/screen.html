@@ -211,16 +211,13 @@
             ws.onerror = () => ws.close();
         }
 
-        function connectGlobal() {
-            if (counterIds.length > 0) {
-                // We just need ONE connection to join 'queue_updates'
-                connectCounter(counterIds[0]);
-            } else {
-                console.error("No counters available to establish global connection.");
+        function connectAll() {
+            if (counterIds.length === 0) {
+                console.error("No counters are assigned to this screen.");
+                return;
             }
+            counterIds.forEach(connectCounter);
         }
-
-        connectGlobal();
 
         function updateStatus(connected) {
             const indicator = document.getElementById('status-indicator');
@@ -240,7 +237,6 @@
         }
 
         connectAll();
-    </script>
     </script>
 </body>
 </html>
