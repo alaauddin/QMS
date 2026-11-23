@@ -1,0 +1,43 @@
+name: qms
+
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    user: "${QMS_UID:-1000}:${QMS_GID:-1000}"
+    environment:
+      QMS_SECRET_KEY: "${QMS_SECRET_KEY:?Set QMS_SECRET_KEY in .env}"
+      QMS_DEBUG: "false"
+      QMS_ALLOWED_HOSTS: "${QMS_ALLOWED_HOSTS:?Set QMS_ALLOWED_HOSTS in .env}"
+      QMS_REDIS_HOST: redis
+    volumes:
+      - ./docker-data/db.sqlite3:/app/db.sqlite3
+      - ./docker-data/media:/app/media
+      - staticfiles:/app/staticfiles
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "${QMS_PORT:-8099}:80"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./docker-data/media:/app/media:ro
+      - staticfiles:/app/staticfiles:ro
+    depends_on:
+      - app
+
+volumes:
+  staticfiles:

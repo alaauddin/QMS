@@ -29,3 +29,7 @@ ios/
 # MacOS / OS
 .DS_Store
 Thumbs.db
+
+# Local database and Docker deployment data
+db.sqlite3
+docker-data/

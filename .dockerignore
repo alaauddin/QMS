@@ -1,0 +1,14 @@
+.git
+.env
+.venv
+venv
+db.sqlite3
+media
+staticfiles
+static_collected
+**/__pycache__
+**/*.pyc
+mobile-app/node_modules
+mobile-app/.expo
+mobile-app/dist
+docker-data
