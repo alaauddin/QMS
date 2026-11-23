@@ -10,7 +10,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap');
 
         @page {
-            size: 80mm 90mm;
+            size: 80mm 110mm;
             margin: 0 !important;
         }
 
@@ -36,54 +36,46 @@
         .org-name { 
             font-weight: 800; 
             font-size: 1.4rem; 
-            margin-bottom: 5px; 
+            margin: 0 0 2mm;
             letter-spacing: 1px;
         }
 
         .service-title { 
             font-size: 1.2rem; 
             border-bottom: 2px solid black; 
-            padding-bottom: 8px; 
-            margin-bottom: 8px;
+            padding-bottom: 2mm;
+            margin: 0 0 2mm;
             font-weight: bold;
         }
 
         .token-prefix { 
             font-size: 1.8rem; 
             font-weight: bold;
-            margin-bottom: -5px; 
+            margin-bottom: 0;
         }
 
         .token-number { 
-            font-size: 6.5rem; 
+            font-size: 6rem;
             font-weight: 900; 
             line-height: 1.1; 
             margin: 0;
         }
 
         .ticket-footer { 
-            margin-top: 8px;
+            margin-top: 2mm;
             border-top: 1px dashed black; 
-            padding-top: 8px;
+            padding-top: 2mm;
         }
 
         .date { 
             font-size: 1rem; 
             font-weight: bold;
-            margin-bottom: 5px; 
+            margin: 0;
         }
 
         .msg { 
             font-size: 0.9rem; 
-            margin-bottom: 10px;
-        }
-
-        .barcode { 
-            font-size: 1.5rem; 
-            letter-spacing: 2px;
-            font-family: monospace;
-            opacity: 0.8;
-            margin-top: 10px;
+            margin: 0;
         }
 
         @media screen {
@@ -107,7 +99,6 @@
         <div class="ticket-footer">
             <div class="date">{{ token.created_at|date:"d/m/Y H:i" }}</div>
             <div class="msg">{% trans "Thank you for waiting" %}</div>
-            <div class="barcode">|||| || |||| ||| ||</div>
         </div>
     </div>
 
