@@ -1,10 +1,9 @@
-{% load i18n %}
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% trans "Screen Display" %}</title>
+    <title>شاشة العرض</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
     <!-- Google Fonts -->
@@ -150,14 +149,14 @@
                         <div class="screen-logo-frame"><img src="{{ system_config.logo.url }}" alt="{{ system_config.system_name }}" class="screen-logo"></div>
                     {% endif %}
 
-                    <div class="header-label">{% trans "Current Token" %}</div>
+                    <div class="header-label">رقم التذكرة الحالي</div>
                     
                     <div class="token-container">
                         <h1 id="token-display" dir="ltr" class="token-number">--</h1>
                     </div>
 
                     <div class="footer-info text-center">
-                        <div class="instruction-text">{% trans "Please proceed to Counter" %}</div>
+                        <div class="instruction-text">يرجى التوجه إلى الشباك</div>
                         <div id="counter-badge" dir="ltr" class="counter-badge">--</div>
                     </div>
                 </div>
@@ -198,6 +197,13 @@
         const counterIds = [{% for counter in counters %}"{{ counter.id }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
         const activeConnections = new Set();
         const playedAnnouncements = new Set();
+
+        function englishDigits(value) {
+            return String(value).replace(/[\u0660-\u0669\u06f0-\u06f9]/g, digit => {
+                const code = digit.charCodeAt(0);
+                return String.fromCharCode(48 + (code >= 0x06f0 ? code - 0x06f0 : code - 0x0660));
+            });
+        }
         
         function playAnnouncement(data) {
             if (!data.audio) return;
@@ -213,12 +219,12 @@
 
         function updateDisplay(tokenText, counterNum) {
             const tokenDisplay = document.getElementById('token-display');
-            tokenDisplay.innerText = String(tokenText);
+            tokenDisplay.innerText = englishDigits(tokenText);
             tokenDisplay.classList.remove('new-token');
             void tokenDisplay.offsetWidth; 
             tokenDisplay.classList.add('new-token');
 
-            document.getElementById('counter-badge').innerText = String(counterNum);
+            document.getElementById('counter-badge').innerText = englishDigits(counterNum);
         }
 
         function connectCounter(id) {
