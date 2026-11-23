@@ -339,9 +339,9 @@
             document.getElementById('main-ui').style.opacity = '0.3';
             
             // Use the current cookie because logging in elsewhere can rotate the CSRF token.
-            const csrfCookie = document.cookie.split('; ').find(cookie => cookie.startsWith('csrftoken='));
+            const csrfCookie = document.cookie.split('; ').find(cookie => cookie.startsWith('qms_csrftoken='));
             const csrfToken = csrfCookie
-                ? decodeURIComponent(csrfCookie.slice('csrftoken='.length))
+                ? decodeURIComponent(csrfCookie.slice('qms_csrftoken='.length))
                 : document.querySelector('#token-request-form [name=csrfmiddlewaretoken]').value;
 
             // Create one token and use its returned HTML for display and printing.

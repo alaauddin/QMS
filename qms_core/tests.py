@@ -17,7 +17,7 @@ class TokenCreationTests(TestCase):
         client = Client(enforce_csrf_checks=True)
         kiosk = client.get(reverse("qms_core:kiosk"))
         self.assertEqual(kiosk.status_code, 200)
-        csrf_token = client.cookies["csrftoken"].value
+        csrf_token = client.cookies["qms_csrftoken"].value
 
         response = client.post(
             self.web_url + "?format=print",
@@ -31,11 +31,11 @@ class TokenCreationTests(TestCase):
     def test_current_csrf_cookie_works_after_cookie_rotation(self):
         client = Client(enforce_csrf_checks=True)
         client.get(reverse("qms_core:kiosk"))
-        client.cookies["csrftoken"] = "a" * 32
+        client.cookies["qms_csrftoken"] = "a" * 32
 
         response = client.post(
             self.web_url + "?format=print",
-            HTTP_X_CSRFTOKEN=client.cookies["csrftoken"].value,
+            HTTP_X_CSRFTOKEN=client.cookies["qms_csrftoken"].value,
         )
 
         self.assertEqual(response.status_code, 200)

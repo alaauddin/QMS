@@ -28,6 +28,10 @@ DEBUG = os.environ.get('QMS_DEBUG', 'true').lower() in ('1', 'true', 'yes', 'on'
 
 ALLOWED_HOSTS = [host.strip() for host in os.environ.get('QMS_ALLOWED_HOSTS', '*').split(',') if host.strip()]
 
+# Browser cookies are shared across ports on the same host. Keep QMS separate.
+CSRF_COOKIE_NAME = 'qms_csrftoken'
+SESSION_COOKIE_NAME = 'qms_sessionid'
+
 
 # Application definition
 
