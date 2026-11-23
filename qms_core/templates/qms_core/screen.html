@@ -112,12 +112,12 @@
                     <div class="header-label text-uppercase opacity-75">{% trans "Current Token" %}</div>
                     
                     <div class="token-container">
-                        <h1 id="token-display" class="token-number" style="font-size: 15rem; font-weight: 900; margin: 0; color: var(--accent-color); text-shadow: 0 0 50px var(--highlight-glow);">--</h1>
+                        <h1 id="token-display" dir="ltr" class="token-number" style="font-size: 15rem; font-weight: 900; margin: 0; color: var(--accent-color); text-shadow: 0 0 50px var(--highlight-glow);">--</h1>
                     </div>
 
                     <div class="footer-info text-center">
                         <div class="instruction-text fs-2 opacity-50 mb-2">{% trans "Please proceed to Counter" %}</div>
-                        <div id="counter-badge" class="counter-badge bg-primary px-5 py-2 rounded-pill display-3 fw-bold shadow-lg">--</div>
+                        <div id="counter-badge" dir="ltr" class="counter-badge bg-primary px-5 py-2 rounded-pill display-3 fw-bold shadow-lg">--</div>
                     </div>
                 </div>
             </div>
@@ -158,10 +158,6 @@
         const activeConnections = new Set();
         const playedAnnouncements = new Set();
         
-        function toArDigits(str) {
-            return str.toString().replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
-        }
-
         function playAnnouncement(data) {
             if (!data.audio) return;
             if (data.announcement_id) {
@@ -176,12 +172,12 @@
 
         function updateDisplay(tokenText, counterNum) {
             const tokenDisplay = document.getElementById('token-display');
-            tokenDisplay.innerText = toArDigits(tokenText);
+            tokenDisplay.innerText = String(tokenText);
             tokenDisplay.classList.remove('new-token');
             void tokenDisplay.offsetWidth; 
             tokenDisplay.classList.add('new-token');
 
-            document.getElementById('counter-badge').innerText = toArDigits(counterNum.toString());
+            document.getElementById('counter-badge').innerText = String(counterNum);
         }
 
         function connectCounter(id) {
