@@ -10,8 +10,9 @@ services:
       QMS_DEBUG: "false"
       QMS_ALLOWED_HOSTS: "${QMS_ALLOWED_HOSTS:?Set QMS_ALLOWED_HOSTS in .env}"
       QMS_REDIS_HOST: redis
+      QMS_SQLITE_PATH: /app/data/db.sqlite3
     volumes:
-      - ./docker-data/db.sqlite3:/app/db.sqlite3
+      - ./docker-data:/app/data
       - ./docker-data/media:/app/media
       - staticfiles:/app/staticfiles
     depends_on:
