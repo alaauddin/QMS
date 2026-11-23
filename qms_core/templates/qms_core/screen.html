@@ -156,15 +156,21 @@
     <script>
         const counterIds = [{% for counter in counters %}"{{ counter.id }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
         const activeConnections = new Set();
+        const playedAnnouncements = new Set();
         
         function toArDigits(str) {
             return str.toString().replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
         }
 
-        function playBase64Audio(base64Data) {
-            if (!base64Data) return;
-            const audioSrc = "data:audio/mp3;base64," + base64Data;
-            const audio = new Audio(audioSrc);
+        function playAnnouncement(data) {
+            if (!data.audio) return;
+            if (data.announcement_id) {
+                if (playedAnnouncements.has(data.announcement_id)) return;
+                playedAnnouncements.add(data.announcement_id);
+                setTimeout(() => playedAnnouncements.delete(data.announcement_id), 60000);
+            }
+
+            const audio = new Audio("data:audio/mp3;base64," + data.audio);
             audio.play().catch(e => console.error("Audio play failed:", e));
         }
 
@@ -194,9 +200,9 @@
                 const data = JSON.parse(e.data);
                 if (data.type === 'token_called') {
                     updateDisplay(data.service + data.token, data.counter);
-                    if (data.audio) playBase64Audio(data.audio);
+                    if (data.audio) playAnnouncement(data);
                 } else if (data.type === 'token_audio') {
-                    playBase64Audio(data.audio);
+                    playAnnouncement(data);
                 } else if (data.type === 'token_cleared') {
                     updateDisplay("--", "--");
                 }

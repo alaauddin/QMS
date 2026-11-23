@@ -33,7 +33,8 @@ class CounterConsumer(AsyncWebsocketConsumer):
     async def token_audio(self, event):
         await self.send(text_data=json.dumps({
             'type': 'token_audio',
-            'audio': event['audio']
+            'audio': event['audio'],
+            'announcement_id': event['announcement_id'],
         }))
 
     async def token_cleared(self, event):

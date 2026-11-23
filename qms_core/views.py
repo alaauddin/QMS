@@ -16,6 +16,7 @@ import edge_tts
 from .models import Ads
 from django.db.models import Count, Avg, F, Q
 import threading
+import uuid
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -112,7 +113,8 @@ def _async_tts_broadcast(token_id, counter_id, text):
                 {
                     'type': 'token_audio',
                     'audio': audio_base64,
-                    'counter_id': counter_id_val
+                    'counter_id': counter_id_val,
+                    'announcement_id': uuid.uuid4().hex,
                 }
             )
         except Exception as e:
