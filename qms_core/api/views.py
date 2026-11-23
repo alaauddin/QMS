@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from django.template.loader import render_to_string
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -36,6 +37,7 @@ def api_kiosk_data(request):
     })
 
 @csrf_exempt
+@require_POST
 def api_take_token(request, service_id):
     """
     JSON API to generate a token and return data for the mobile app (including print fragment).

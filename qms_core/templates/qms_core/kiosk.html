@@ -299,6 +299,8 @@
         <p class="opacity-75">{% trans "Resetting in 5 seconds..." %}</p>
     </div>
 
+    <form id="token-request-form" hidden>{% csrf_token %}</form>
+
     <!-- Hidden Iframe for Printing Isolation (Hidden but active) -->
     <iframe id="print-frame" style="position: absolute; opacity: 0; pointer-events: none; height: 1px; width: 1px;"></iframe>
 
@@ -336,10 +338,19 @@
             // UI Feedback
             document.getElementById('main-ui').style.opacity = '0.3';
             
-            // Show success overlay (we show it before printing for better UX)
-            // We'll fetch the token number separately to display it while printing
-            fetch(url + '?format=print', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                .then(res => res.text())
+            // Create one token and use its returned HTML for display and printing.
+            fetch(url + '?format=print', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'X-CSRFToken': document.querySelector('#token-request-form [name=csrfmiddlewaretoken]').value,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error(`Token request failed: ${res.status}`);
+                    return res.text();
+                })
                 .then(html => {
                     const temp = document.createElement('div');
                     temp.innerHTML = html;
@@ -348,9 +359,9 @@
                     
                     document.getElementById('success-overlay').style.display = 'flex';
 
-                    // Trigger actual printing via hidden iframe
+                    // Print the same token without another request to the server.
                     const pFrame = document.getElementById('print-frame');
-                    pFrame.src = url + '?format=print';
+                    pFrame.srcdoc = html;
                 })
                 .catch(err => {
                     console.error('Kiosk Error:', err);

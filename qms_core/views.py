@@ -17,6 +17,7 @@ from .models import Ads
 from django.db.models import Count, Avg, F, Q
 import threading
 from django.views.decorators.clickjacking import xframe_options_exempt
+from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 
@@ -621,6 +622,7 @@ def kiosk(request):
     })
 
 @xframe_options_exempt
+@require_POST
 def take_token(request, service_id):
     """
     Logic for generating a new token for a customer.
