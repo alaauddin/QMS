@@ -28,6 +28,19 @@ class TokenCreationTests(TestCase):
         self.assertEqual(Token.objects.count(), 1)
         self.assertContains(response, '<div class="token-number">1</div>', html=True)
 
+    def test_current_csrf_cookie_works_after_cookie_rotation(self):
+        client = Client(enforce_csrf_checks=True)
+        client.get(reverse("qms_core:kiosk"))
+        client.cookies["csrftoken"] = "a" * 32
+
+        response = client.post(
+            self.web_url + "?format=print",
+            HTTP_X_CSRFTOKEN=client.cookies["csrftoken"].value,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Token.objects.count(), 1)
+
     def test_get_cannot_create_tokens(self):
         self.assertEqual(self.client.get(self.web_url).status_code, 405)
         self.assertEqual(self.client.get(self.api_url).status_code, 405)
