@@ -39,10 +39,19 @@
             color: #333;
             margin-bottom: 1rem;
         }
+        @page { size: 80mm 90mm; margin: 0; }
         @media print {
             .no-print { display: none; }
-            body { background: white; }
-            .ticket-card { border: none; margin: 0; padding: 10px; width: 100%; border-bottom: 1px dotted #ccc; }
+            html, body { width: 80mm; margin: 0; padding: 0; background: white; }
+            .ticket-card {
+                box-sizing: border-box;
+                width: 72mm;
+                border: 0;
+                margin: 0 auto;
+                padding: 3mm 0 2mm;
+            }
+            .ticket-number { font-size: 5rem; }
+            .service-name { margin-bottom: 0.5rem; }
         }
     </style>
 </head>

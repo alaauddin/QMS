@@ -8,9 +8,9 @@
     <!-- We use inline styles to ensure zero external dependency during print -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap');
-        
+
         @page {
-            size: 80mm auto !important;
+            size: 80mm 90mm;
             margin: 0 !important;
         }
 
@@ -18,8 +18,7 @@
             margin: 0;
             padding: 0;
             width: 80mm;
-            min-width: 80mm;
-            max-width: 80mm;
+            box-sizing: border-box;
             background: white;
             font-family: 'Cairo', sans-serif;
             color: black;
@@ -27,9 +26,10 @@
         }
 
         .ticket-wrapper {
-            width: 70mm; /* Leave a small margin for the mechanical cutter */
+            width: 72mm;
+            box-sizing: border-box;
             margin: 0 auto;
-            padding: 10px 0;
+            padding: 3mm 0 2mm;
             text-align: center;
         }
 
@@ -44,13 +44,13 @@
             font-size: 1.2rem; 
             border-bottom: 2px solid black; 
             padding-bottom: 8px; 
-            margin-bottom: 15px; 
+            margin-bottom: 8px;
             font-weight: bold;
         }
 
         .token-prefix { 
             font-size: 1.8rem; 
-            font-weight: bold; 
+            font-weight: bold;
             margin-bottom: -5px; 
         }
 
@@ -58,13 +58,13 @@
             font-size: 6.5rem; 
             font-weight: 900; 
             line-height: 1.1; 
-            margin: 0; 
+            margin: 0;
         }
 
         .ticket-footer { 
-            margin-top: 20px; 
+            margin-top: 8px;
             border-top: 1px dashed black; 
-            padding-top: 15px; 
+            padding-top: 8px;
         }
 
         .date { 
@@ -98,12 +98,12 @@
             <h2 class="org-name">QMS SYSTEM</h2>
             <p class="service-title">{{ token.service.name }}</p>
         </div>
-        
+
         <div class="ticket-body">
             <div class="token-prefix">{{ token.service.prefix }}</div>
             <div class="token-number">{{ token.number }}</div>
         </div>
-        
+
         <div class="ticket-footer">
             <div class="date">{{ token.created_at|date:"d/m/Y H:i" }}</div>
             <div class="msg">{% trans "Thank you for waiting" %}</div>
@@ -114,13 +114,13 @@
     <script>
         function handlePrint() {
             let printed = false;
-            
+
             // Function to trigger print and signal parent
             const trigger = () => {
                 if (printed) return;
                 printed = true;
                 window.focus();
-                
+
                 // Trigger reset when the print dialog is closed
                 window.onafterprint = () => {
                     if (window.parent && window.parent.onTicketPrinted) {
