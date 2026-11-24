@@ -526,6 +526,8 @@
             var shell = document.getElementById('screen-shell');
             var viewportWidth = window.innerWidth || document.documentElement.clientWidth;
             var viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+            // Some TV browsers report a tiny viewport while waking up.
+            if (viewportWidth < 320 || viewportHeight < 240) return false;
             var scale = screenZoom / 100;
             document.getElementById('screen-zoom-level').innerHTML = screenZoom + '%';
             if (viewportWidth < 1100) {
@@ -537,9 +539,10 @@
                 shell.style.height = '';
                 shell.style.minHeight = '';
                 shell.style.transform = '';
+                shell.style.webkitTransform = '';
                 document.body.style.zoom = screenZoom + '%';
                 shell.className = 'screen-shell';
-                return;
+                return true;
             }
             document.body.style.zoom = '100%';
             document.body.style.overflow = 'hidden';
@@ -550,14 +553,20 @@
             shell.style.height = (viewportHeight / scale) + 'px';
             shell.style.minHeight = (viewportHeight / scale) + 'px';
             shell.style.transformOrigin = 'top right';
+            shell.style.webkitTransformOrigin = 'top right';
             shell.style.transform = 'scale(' + scale + ')';
+            shell.style.webkitTransform = 'scale(' + scale + ')';
             shell.className = viewportHeight / scale < 700 ? 'screen-shell screen-zoom-compact' : 'screen-shell';
+            return true;
+        }
+
+        function refreshScreenLayout() {
+            if (applyScreenZoom()) applyTokenZoom();
         }
 
         function changeScreenZoom(step) {
             screenZoom = Math.max(80, Math.min(120, screenZoom + step));
-            applyScreenZoom();
-            applyTokenZoom();
+            refreshScreenLayout();
             try { window.localStorage.setItem(screenZoomStorageKey, String(screenZoom)); } catch (error) {}
         }
 
@@ -768,12 +777,20 @@
             request.send(null);
         }
 
-        applyScreenZoom();
-        applyTokenZoom();
-        window.onresize = function() {
-            applyScreenZoom();
-            applyTokenZoom();
-        };
+        refreshScreenLayout();
+        window.onresize = refreshScreenLayout;
+        window.onfocus = refreshScreenLayout;
+        window.onpageshow = refreshScreenLayout;
+        if (document.addEventListener) {
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    refreshScreenLayout();
+                    setTimeout(refreshScreenLayout, 500);
+                }
+            }, false);
+        }
+        // Recheck after wake even when the TV browser does not send resize or focus events.
+        setInterval(refreshScreenLayout, 3000);
         updateStatus(false);
         for (var i = 0; i < counterIds.length; i++) connectCounter(counterIds[i]);
         refreshData();
