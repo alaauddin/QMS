@@ -45,15 +45,31 @@
         .panel-title { font-size: clamp(27px, 2.5vw, 42px); line-height: 1.22; margin: 0; font-weight: 900; }
         .panel-note { color: var(--muted); margin: 8px 0 0; font-size: clamp(15px, 1.1vw, 19px); }
         .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
-        .service-card { width: 100%; text-align: start; cursor: pointer; border: 2px solid #dcebea; background: #fbfefe; border-radius: 23px; padding: clamp(20px, 2vw, 30px); color: var(--ink); display: flex; flex-direction: column; gap: 18px; min-height: 190px; transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease; }
-        .service-card:hover { border-color: #79c5c2; box-shadow: 0 14px 26px rgba(6, 107, 111, .10); transform: translateY(-2px); }
+        .service-card { width: 100%; text-align: start; cursor: pointer; border: 2px solid #dcebea; background: #fbfefe; border-radius: 23px; padding: clamp(20px, 2vw, 30px); color: var(--ink); display: flex; flex-direction: column; gap: 16px; min-height: 210px; transition: transform .15s ease; animation: servicePulse 3.6s ease-in-out infinite; }
+        .service-card:nth-child(2n) { animation-delay: .6s; }
+        .service-card:nth-child(3n) { animation-delay: 1.2s; }
+        .service-card:hover, .service-card:focus-visible { animation-play-state: paused; border-color: #48aaa4; background: #f2faf8; box-shadow: 0 14px 26px rgba(6, 107, 111, .12); transform: translateY(-2px); }
+        @keyframes servicePulse {
+            0%, 100% { border-color: #dcebea; box-shadow: 0 2px 8px rgba(6, 107, 111, .02); }
+            45% { border-color: #58b8b1; box-shadow: 0 0 0 5px rgba(8, 126, 131, .10), 0 12px 25px rgba(6, 107, 111, .10); }
+        }
         .service-card:active { transform: scale(.98); }
         .card-top { display: flex; align-items: center; gap: 15px; }
         .icon-box { width: 55px; height: 55px; flex: none; border-radius: 17px; display: grid; place-items: center; background: #e2f3f1; color: var(--teal); font-size: 26px; }
         .service-title { font-size: clamp(19px, 1.55vw, 27px); line-height: 1.3; font-weight: 800; margin: 0; }
         .service-desc { margin: 0; color: var(--muted); font-size: clamp(14px, 1vw, 17px); line-height: 1.6; }
-        .service-footer { margin-top: auto; border-top: 1px solid var(--line); padding-top: 13px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px 18px; color: var(--muted); font-size: 14px; font-weight: 700; }
+        .tap-action { align-self: flex-start; max-width: 100%; display: inline-flex; align-items: center; gap: 9px; margin-top: auto; padding: 7px 13px; border-radius: 999px; background: var(--teal); color: #fff; font-size: 16px; line-height: 1.35; font-weight: 900; box-shadow: 0 5px 12px rgba(8, 126, 131, .16); }
+        .tap-hand { display: inline-flex; width: 34px; height: 34px; align-items: center; justify-content: center; transform-origin: center bottom; animation: handTap 3.6s ease-in-out infinite; }
+        .tap-hand svg { width: 32px; height: 32px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+        .service-card:nth-child(2n) .tap-hand { animation-delay: .6s; }
+        .service-card:nth-child(3n) .tap-hand { animation-delay: 1.2s; }
+        @keyframes handTap {
+            0%, 29%, 48%, 100% { transform: translateY(0) scale(1); }
+            38% { transform: translateY(4px) scale(.88); }
+        }
+        .service-footer { border-top: 1px solid var(--line); padding-top: 13px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px 18px; color: var(--muted); font-size: 14px; font-weight: 700; }
         .service-footer b { color: var(--teal-dark); font-size: 17px; }
+        .service-footer [hidden] { display: none; }
         .success-overlay { position: fixed; inset: 0; z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; background: radial-gradient(circle at 50% 25%, #effbf8 0%, #d8f1ed 45%, #c7e7e3 100%); color: var(--ink); }
         .success-icon { width: 80px; height: 80px; display: grid; place-items: center; border-radius: 50%; color: white; background: var(--teal); font-size: 48px; font-weight: 900; margin-bottom: 18px; }
         .success-title { margin: 0; font-size: clamp(30px, 3vw, 54px); font-weight: 900; }
@@ -62,8 +78,8 @@
         .token-label { color: var(--teal-dark); font-size: clamp(19px, 1.6vw, 27px); font-weight: 800; }
         .token-val { color: var(--teal-dark); font-size: clamp(8rem, 18vw, 16rem); line-height: 1.06; font-weight: 900; font-variant-numeric: tabular-nums; direction: ltr; }
         .reset-note { color: var(--muted); font-size: 17px; margin: 0; }
-        @media (max-width: 650px) { .kiosk-wrapper { padding: 12px; gap: 12px; } .kiosk-header, .panel { border-radius: 20px; padding: 18px; } .brand-mark { width: 50px; height: 50px; font-size: 30px; border-radius: 14px; } .brand-logo { max-width: 75px; } .brand { gap: 10px; } .brand-subtitle { display: none; } .btn-lang { min-width: 72px; padding: 8px; } .services-grid { grid-template-columns: 1fr; } .service-card { min-height: 150px; } .token-val { font-size: clamp(5rem, 20vw, 8rem); } }
-        @media (prefers-reduced-motion: reduce) { .service-card { transition: none; } }
+        @media (max-width: 650px) { .kiosk-wrapper { padding: 12px; gap: 12px; } .kiosk-header, .panel { border-radius: 20px; padding: 18px; } .brand-mark { width: 50px; height: 50px; font-size: 30px; border-radius: 14px; } .brand-logo { max-width: 75px; } .brand { gap: 10px; } .brand-subtitle { display: none; } .btn-lang { min-width: 72px; padding: 8px; } .services-grid { grid-template-columns: 1fr; } .service-card { min-height: 185px; } .token-val { font-size: clamp(5rem, 20vw, 8rem); } }
+        @media (prefers-reduced-motion: reduce) { .service-card { transition: none; animation: none; } .tap-hand { animation: none; } }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
@@ -78,13 +94,14 @@
         </header>
         <main class="kiosk-content">
             <section class="panel" aria-labelledby="services-title">
-                <div class="panel-heading"><div><p class="eyebrow">{% if LANGUAGE_CODE == 'ar' %}ابدأ من هنا{% else %}Start here{% endif %}</p><h2 class="panel-title" id="services-title">{% if LANGUAGE_CODE == 'ar' %}اختر الخدمة{% else %}Choose a service{% endif %}</h2><p class="panel-note">{% trans "Choose a service to get your token" %}</p></div></div>
+                <div class="panel-heading"><div><p class="eyebrow">{% if LANGUAGE_CODE == 'ar' %}ابدأ من هنا{% else %}Start here{% endif %}</p><h2 class="panel-title" id="services-title">{% if LANGUAGE_CODE == 'ar' %}اختر الخدمة{% else %}Choose a service{% endif %}</h2><p class="panel-note">{% if LANGUAGE_CODE == 'ar' %}اضغط على الخدمة للحصول على تذكرتك{% else %}Tap a service to get your ticket{% endif %}</p></div></div>
                 <div class="services-grid">
                     {% for item in services_data %}
                     <button type="button" class="service-card" onclick="handleServiceSelect('{{ item.obj.id }}')">
                         <span class="card-top"><span class="icon-box" aria-hidden="true"><i class="{{ item.obj.icon_class|default:'fas fa-stethoscope' }}"></i></span><span class="service-title">{{ item.obj.name }}</span></span>
                         {% if item.obj.description %}<span class="service-desc">{{ item.obj.description }}</span>{% endif %}
-                        <span class="service-footer"><span>{% trans "Waiting" %}: <b id="wait-count-{{ item.obj.id }}">{{ item.waiting_count }}</b></span>{% if item.ewt %}<span>{% trans "Est. Wait" %}: <b id="ewt-{{ item.obj.id }}">{{ item.ewt }}m</b></span>{% endif %}</span>
+                        <span class="tap-action"><span class="tap-hand" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M8 13V5a2 2 0 0 1 4 0v6M12 11V9a2 2 0 0 1 4 0v3M16 12a2 2 0 0 1 4 0v4c0 3.3-2.7 6-6 6h-2c-2 0-3.4-.7-4.5-2L3 15.5a2 2 0 0 1 2.8-2.8L8 15M4 4 2 2M4 8H1"/></svg></span><span>{% if LANGUAGE_CODE == 'ar' %}اضغط هنا لاختيار الخدمة{% else %}Tap to choose this service{% endif %}</span></span>
+                        <span class="service-footer"><span>{% trans "Waiting" %}: <b id="wait-count-{{ item.obj.id }}">{{ item.waiting_count }}</b></span><span id="ewt-wrap-{{ item.obj.id }}" {% if not item.ewt %}hidden{% endif %}>{% trans "Est. Wait" %}: <b id="ewt-{{ item.obj.id }}">{% if item.ewt %}{{ item.ewt }}m{% endif %}</b></span></span>
                     </button>
                     {% endfor %}
                 </div>
@@ -103,30 +120,65 @@
     <script>
         let isProcessing = false;
 
-        // WebSocket for live queue updates
-        const wsUrl = (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + '/ws/counter/0/';
-        const ws = new WebSocket(wsUrl);
+        let printResetTimer = null;
+        let resetScheduled = false;
 
-        ws.onmessage = function(e) {
-            const data = JSON.parse(e.data);
-            if (data.type === 'queue_changed') {
-                // DON'T reload if we are currently printing!
-                if (!isProcessing) {
-                    location.reload(); 
-                }
-            }
-        };
+        function refreshServiceCounts() {
+            fetch("{% url 'qms_core:api_kiosk_data' %}?_=" + Date.now(), {credentials: 'same-origin'})
+                .then(res => {
+                    if (!res.ok) throw new Error('Could not refresh kiosk data');
+                    return res.json();
+                })
+                .then(data => {
+                    (data.services || []).forEach(service => {
+                        const count = document.getElementById('wait-count-' + service.id);
+                        const wait = document.getElementById('ewt-' + service.id);
+                        const waitWrap = document.getElementById('ewt-wrap-' + service.id);
+                        if (count) count.textContent = service.waiting_count;
+                        if (wait && waitWrap) {
+                            wait.textContent = service.ewt ? service.ewt + 'm' : '';
+                            waitWrap.hidden = !service.ewt;
+                        }
+                    });
+                })
+                .catch(err => console.error('Kiosk refresh error:', err));
+        }
 
-        // Callback used by the child iframe after printing
-        window.onTicketPrinted = function() {
-            setTimeout(() => {
-                location.reload();
-            }, 1000); // Fast 1s reset after print dialog is closed
-        };
+        // Queue updates refresh the displayed counts without interrupting the kiosk.
+        if (window.WebSocket) {
+            const wsUrl = (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + '/ws/counter/0/';
+            const ws = new WebSocket(wsUrl);
+            ws.onmessage = function(e) {
+                const data = JSON.parse(e.data);
+                if (data.type === 'queue_changed' || data.type === 'token_issued') refreshServiceCounts();
+            };
+        }
+        setInterval(refreshServiceCounts, 15000);
+
+        function resetKiosk() {
+            clearTimeout(printResetTimer);
+            document.getElementById('success-overlay').style.display = 'none';
+            document.getElementById('main-ui').style.opacity = '';
+            document.getElementById('final-token-val').textContent = '--';
+            document.getElementById('print-frame').srcdoc = '';
+            isProcessing = false;
+            resetScheduled = false;
+            refreshServiceCounts();
+        }
+
+        function finishTicket() {
+            if (!isProcessing || resetScheduled) return;
+            resetScheduled = true;
+            clearTimeout(printResetTimer);
+            setTimeout(resetKiosk, 2000);
+        }
+
+        window.onTicketPrinted = finishTicket;
 
         function handleServiceSelect(serviceId) {
             if (isProcessing) return;
             isProcessing = true;
+            resetScheduled = false;
 
             const url = "{% url 'qms_core:take_token' '0' %}".replace('0', serviceId);
             
@@ -164,11 +216,13 @@
                     // Print the same token without another request to the server.
                     const pFrame = document.getElementById('print-frame');
                     pFrame.srcdoc = html;
+                    // Older kiosk browsers may not fire afterprint; keep the kiosk ready.
+                    printResetTimer = setTimeout(finishTicket, 12000);
                 })
                 .catch(err => {
                     console.error('Kiosk Error:', err);
                     alert('{% trans "Error generating token. Please contact staff." %}');
-                    location.reload();
+                    resetKiosk();
                 });
         }
     </script>
