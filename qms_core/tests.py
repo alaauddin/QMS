@@ -1,8 +1,16 @@
 from django.test import Client, TestCase, override_settings
+import hashlib
+import json
+import tempfile
+from pathlib import Path
 from django.urls import reverse
 from django.utils import timezone
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
-from .models import Counter, Screen, Service, Token
+from .consumers import CounterConsumer
+from .models import Counter, Screen, Service, SystemConfig, Token
+from .views import call_voice_text
 
 
 @override_settings(CHANNEL_LAYERS={
@@ -53,19 +61,31 @@ class TokenCreationTests(TestCase):
         self.assertEqual(Token.objects.count(), 1)
         self.assertEqual(response.json()["token"]["number"], 1)
 
-    def test_kiosk_shows_sixteen_waiting_tokens_in_two_columns(self):
-        for number in range(1, 18):
-            Token.objects.create(number=number, service=self.service, status="waiting")
-        Token.objects.create(number=18, service=self.service, status="waiting", is_priority=True)
-        Token.objects.create(number=19, service=self.service, status="called")
-
+    def test_kiosk_shows_services_without_queue_or_ads(self):
+        Token.objects.create(number=1, service=self.service, status="waiting")
         response = self.client.get(reverse("qms_core:kiosk"))
-        columns = response.context["queue_columns"]
 
-        self.assertEqual([len(column) for column in columns], [8, 8])
-        self.assertEqual(columns[0][0].number, 18)
-        self.assertNotIn(19, [token.number for column in columns for token in column])
+        self.assertContains(response, self.service.name)
+        self.assertNotIn("queue_columns", response.context)
+        self.assertNotContains(response, 'class="queue-panel"')
         self.assertNotContains(response, 'id="adCarousel"')
+
+    def test_web_and_mobile_issue_events_include_the_new_token(self):
+        layer = get_channel_layer()
+        channel = async_to_sync(layer.new_channel)()
+        async_to_sync(layer.group_add)("queue_updates", channel)
+
+        self.client.post(self.web_url)
+        web_event = async_to_sync(layer.receive)(channel)
+        self.assertEqual(web_event["type"], "token_issued")
+        self.assertEqual(web_event["full_token"], "T1")
+        self.assertEqual(async_to_sync(layer.receive)(channel)["type"], "queue_changed")
+
+        self.client.post(self.api_url)
+        mobile_event = async_to_sync(layer.receive)(channel)
+        self.assertEqual(mobile_event["type"], "token_issued")
+        self.assertEqual(mobile_event["full_token"], "T2")
+        self.assertEqual(async_to_sync(layer.receive)(channel)["type"], "queue_changed")
 
 
 class PublicScreenTests(TestCase):
@@ -92,3 +112,70 @@ class PublicScreenTests(TestCase):
             reverse("qms_core:api_get_screen_data", args=[screen.device_token])
         ).json()
         self.assertEqual(data["queue"], [f"R{number}" for number in range(1, 17)])
+        self.assertEqual(data["latest_issued"]["full_token"], "R19")
+
+    def test_screen_api_exposes_cached_mp3_url_for_current_call(self):
+        service = Service.objects.create(name="Registration", prefix="R")
+        counter = Counter.objects.create(number=3)
+        screen = Screen.objects.create(name="Main lobby", device_token="main-lobby")
+        screen.counters.add(counter)
+        token = Token.objects.create(
+            number=7, service=service, status="called",
+            counter=counter, called_at=timezone.now(),
+        )
+        voice_name = SystemConfig.get_config().voice_name
+        voice_text = call_voice_text(token.number, counter.number)
+        file_hash = hashlib.md5(f"{voice_text}_{voice_name}".encode()).hexdigest()
+
+        with tempfile.TemporaryDirectory() as media_root:
+            with override_settings(MEDIA_ROOT=media_root):
+                audio_path = Path(media_root) / "audio_cache" / f"{file_hash}.mp3"
+                audio_path.parent.mkdir()
+                audio_path.write_bytes(b"ID3" + b"x" * 1100)
+                response = self.client.get(
+                    reverse("qms_core:api_get_screen_data", args=[screen.device_token])
+                )
+
+        self.assertEqual(
+            response.json()["current_call"]["audio_url"],
+            f"/media/audio_cache/{file_hash}.mp3",
+        )
+
+
+class ScreenAudioEventTests(TestCase):
+    def test_audio_event_keeps_mp3_url_and_token_id(self):
+        consumer = CounterConsumer()
+        messages = []
+
+        async def capture(text_data):
+            messages.append(json.loads(text_data))
+
+        consumer.send = capture
+        async_to_sync(consumer.token_audio)({
+            "audio": "base64-data",
+            "audio_url": "/media/audio_cache/call.mp3",
+            "token_id": 12,
+            "counter_id": 3,
+            "announcement_id": "one-call",
+        })
+
+        self.assertEqual(messages[0]["audio_url"], "/media/audio_cache/call.mp3")
+        self.assertEqual(messages[0]["token_id"], 12)
+        self.assertEqual(messages[0]["counter_id"], 3)
+
+    def test_issued_event_keeps_new_token_details(self):
+        consumer = CounterConsumer()
+        messages = []
+
+        async def capture(text_data):
+            messages.append(json.loads(text_data))
+
+        consumer.send = capture
+        async_to_sync(consumer.token_issued)({
+            "token_id": 21,
+            "full_token": "R21",
+            "service_name": "Registration",
+        })
+
+        self.assertEqual(messages[0]["type"], "token_issued")
+        self.assertEqual(messages[0]["full_token"], "R21")

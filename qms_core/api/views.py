@@ -4,10 +4,8 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.template.loader import render_to_string
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
 from ..models import Token, Service, Ads, Counter, SystemConfig, Screen
-from ..views import get_service_wait_info, get_waiting_queue_tokens
+from ..views import broadcast_token_issued, cached_call_audio_url, get_service_wait_info, get_waiting_queue_tokens
 
 @csrf_exempt
 def api_kiosk_data(request):
@@ -57,9 +55,7 @@ def api_take_token(request, service_id):
         created_at=timezone.now()
     )
     
-    # Broadcast to dashboards
-    channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)("queue_updates", {'type': 'queue_changed'})
+    broadcast_token_issued(token)
 
     # Render the print fragment to a string for expo-print
     print_html = render_to_string('qms_core/token_ticket_fragment.html', {'token': token})
@@ -157,6 +153,13 @@ def api_get_screen_data(request, device_token):
                 'token': None
             })
     
+    current_call = (
+        Token.objects.filter(counter__in=counters, status='called')
+        .select_related('service', 'counter')
+        .order_by('-called_at', '-pk')
+        .first()
+    )
+
     # Get last 5 called tokens for this screen's counters
     recent_tokens = Token.objects.filter(
         counter__in=counters, 
@@ -170,6 +173,8 @@ def api_get_screen_data(request, device_token):
         'counter_number': t.counter.number if t.counter else '?'
     } for t in recent_tokens]
 
+    latest_issued = Token.objects.select_related('service').order_by('-created_at', '-pk').first()
+
     # Ads for this screen
     ads = Ads.objects.filter(is_active=True, public_screens=screen)
     ads_data = [{'image_url': request.build_absolute_uri(ad.image.url)} for ad in ads if ad.image]
@@ -180,5 +185,15 @@ def api_get_screen_data(request, device_token):
         'serving': serving_data,
         'recent': recent_data,
         'queue': [str(token) for token in get_waiting_queue_tokens()],
+        'latest_issued': {
+            'id': latest_issued.id,
+            'full_token': str(latest_issued),
+        } if latest_issued else None,
+        'current_call': {
+            'id': current_call.id,
+            'full_token': str(current_call),
+            'counter_number': current_call.counter.number,
+            'audio_url': cached_call_audio_url(current_call),
+        } if current_call else None,
         'ads': ads_data
     })

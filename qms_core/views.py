@@ -44,6 +44,28 @@ def num_to_ar_words(n):
     elif n > 0: res += ones[n]
     return res.strip()
 
+def call_voice_text(token_number, counter_number):
+    return (
+        f"تذكرة رقم {num_to_ar_words(token_number)} . "
+        f"يرجى التوجه إلى كونتر {num_to_ar_words(counter_number)} ."
+    )
+
+
+def cached_call_audio_url(token):
+    """Return a browser-friendly MP3 URL once this call's audio is cached."""
+    if not token.counter_id:
+        return None
+    import hashlib
+    import os
+    voice_name = SystemConfig.get_config().voice_name or "ar-AE-FatimaNeural"
+    voice_text = call_voice_text(token.number, token.counter.number)
+    file_hash = hashlib.md5(f"{voice_text}_{voice_name}".encode()).hexdigest()
+    audio_path = os.path.join(settings.MEDIA_ROOT, 'audio_cache', f'{file_hash}.mp3')
+    if not os.path.isfile(audio_path):
+        return None
+    return f"{settings.MEDIA_URL.rstrip('/')}/audio_cache/{file_hash}.mp3"
+
+
 def _async_tts_broadcast(token_id, counter_id, text):
     """
     Background worker to generate Neural Edge-TTS and broadcast only the audio.
@@ -105,14 +127,19 @@ def _async_tts_broadcast(token_id, counter_id, text):
                     if not audio_data:
                          return # Don't send empty audio
             
+            if len(audio_data) <= 1000:
+                return
             audio_base64 = base64.b64encode(audio_data).decode('utf-8')
-            
+            audio_url = f"{settings.MEDIA_URL.rstrip('/')}/audio_cache/{file_hash}.mp3"
+
             channel_layer = get_channel_layer()
             await channel_layer.group_send(
                 "queue_updates",
                 {
                     'type': 'token_audio',
                     'audio': audio_base64,
+                    'audio_url': audio_url,
+                    'token_id': token_id,
                     'counter_id': counter_id_val,
                     'announcement_id': uuid.uuid4().hex,
                 }
@@ -138,6 +165,7 @@ def broadcast_token_call(token, serving_counter):
         {
             'type': 'token_called',
             'token': str(token.number),
+            'token_id': token.id,
             'service': token.service.prefix,
             'service_name': token.service.name,
             'counter': serving_counter.number,
@@ -150,10 +178,7 @@ def broadcast_token_call(token, serving_counter):
 
     # 3. Asynchronous Voice Generation
     # Modern & Smooth: Concisely stating the instructions.
-    voice_text = (
-        f"تذكرة رقم {num_to_ar_words(token.number)} . "
-        f"يرجى التوجه إلى كونتر {num_to_ar_words(serving_counter.number)} ."
-    )
+    voice_text = call_voice_text(token.number, serving_counter.number)
     threading.Thread(
         target=_async_tts_broadcast, 
         args=(token.id, serving_counter.id, voice_text),
@@ -588,6 +613,18 @@ def get_dashboard_data(request):
         }
     })
 
+def broadcast_token_issued(token):
+    """Tell public screens about a newly issued ticket and refresh queue clients."""
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)("queue_updates", {
+        'type': 'token_issued',
+        'token_id': token.id,
+        'full_token': str(token),
+        'service_name': token.service.name,
+    })
+    async_to_sync(channel_layer.group_send)("queue_updates", {'type': 'queue_changed'})
+
+
 def get_waiting_queue_tokens():
     """Return the first 16 waiting tickets in call order."""
     return list(
@@ -604,6 +641,7 @@ def public_screen(request, device_token):
     screen = get_object_or_404(Screen, device_token=device_token, is_active=True)
     counters = screen.counters.all()
     queue_tokens = get_waiting_queue_tokens()
+    latest_issued = Token.objects.order_by('-created_at', '-pk').first()
     current_token = (
         Token.objects.filter(counter__in=counters, status='called')
         .select_related('service', 'counter')
@@ -615,6 +653,7 @@ def public_screen(request, device_token):
         'screen': screen,
         'counters': counters,
         'current_token': current_token,
+        'latest_issued': latest_issued,
         'queue_columns': [queue_tokens[:8], queue_tokens[8:]],
     })
 
@@ -633,10 +672,8 @@ def kiosk(request):
             'ewt': ewt
         })
         
-    queue_tokens = get_waiting_queue_tokens()
     return render(request, 'qms_core/kiosk.html', {
         'services_data': services_data,
-        'queue_columns': [queue_tokens[:8], queue_tokens[8:]],
     })
 
 @xframe_options_exempt
@@ -667,14 +704,7 @@ def take_token(request, service_id):
         created_at=timezone.now()
     )
     
-    # Broadcast to update operator dashboards
-    channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)(
-        "queue_updates",
-        {
-            'type': 'queue_changed',
-        }
-    )
+    broadcast_token_issued(token)
 
     # Check if a print fragment is requested
     if request.GET.get('format') == 'print':

@@ -38,13 +38,13 @@
         .brand-subtitle { margin: 3px 0 0; color: var(--muted); font-size: clamp(14px, 1.05vw, 18px); }
         .btn-lang { flex: none; color: var(--teal-dark); text-decoration: none; background: #eff8f7; border: 1px solid #cae5e3; border-radius: 14px; padding: 10px 20px; font-weight: 800; min-width: 104px; text-align: center; }
         .btn-lang:focus-visible, .service-card:focus-visible { outline: 4px solid #90d6d2; outline-offset: 3px; }
-        .kiosk-content { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(360px, .85fr); gap: clamp(18px, 2vw, 32px); }
+        .kiosk-content { flex: 1; min-height: 0; display: block; }
         .panel { min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 30px; box-shadow: 0 14px 40px rgba(29, 81, 89, .06); padding: clamp(22px, 2.3vw, 36px); }
         .panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: clamp(20px, 2vw, 30px); }
         .eyebrow { color: var(--teal); font-weight: 800; font-size: 13px; letter-spacing: .13em; text-transform: uppercase; margin: 0 0 5px; }
         .panel-title { font-size: clamp(27px, 2.5vw, 42px); line-height: 1.22; margin: 0; font-weight: 900; }
         .panel-note { color: var(--muted); margin: 8px 0 0; font-size: clamp(15px, 1.1vw, 19px); }
-        .services-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
         .service-card { width: 100%; text-align: start; cursor: pointer; border: 2px solid #dcebea; background: #fbfefe; border-radius: 23px; padding: clamp(20px, 2vw, 30px); color: var(--ink); display: flex; flex-direction: column; gap: 18px; min-height: 190px; transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease; }
         .service-card:hover { border-color: #79c5c2; box-shadow: 0 14px 26px rgba(6, 107, 111, .10); transform: translateY(-2px); }
         .service-card:active { transform: scale(.98); }
@@ -54,16 +54,6 @@
         .service-desc { margin: 0; color: var(--muted); font-size: clamp(14px, 1vw, 17px); line-height: 1.6; }
         .service-footer { margin-top: auto; border-top: 1px solid var(--line); padding-top: 13px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px 18px; color: var(--muted); font-size: 14px; font-weight: 700; }
         .service-footer b { color: var(--teal-dark); font-size: 17px; }
-        .queue-panel { display: flex; flex-direction: column; background: linear-gradient(145deg, #ffffff 0%, #f9fdfc 100%); }
-        .queue-heading { align-items: center; }
-        .live-badge { display: inline-flex; align-items: center; gap: 8px; color: var(--teal-dark); background: #e5f4f1; padding: 8px 13px; border-radius: 999px; font-size: 13px; font-weight: 800; white-space: nowrap; }
-        .live-badge::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: #39a681; }
-        .queue-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-content: start; }
-        .queue-column { display: grid; grid-template-rows: repeat(8, minmax(56px, auto)); gap: 10px; min-width: 0; }
-        .queue-token { display: flex; align-items: center; justify-content: center; min-width: 0; background: #eef7f6; border: 1px solid #d5e9e6; border-radius: 15px; padding: 5px 8px; color: var(--teal-dark); font-weight: 900; font-size: clamp(23px, 2.2vw, 38px); line-height: 1.2; font-variant-numeric: tabular-nums; white-space: nowrap; }
-        .queue-token:first-child { background: #dbf0ec; border-color: #acd9d2; }
-        .queue-placeholder { color: #b7d2d0; background: #f7fbfa; border-style: dashed; }
-        .queue-empty { margin: auto 0; text-align: center; color: var(--muted); font-size: 20px; }
         .success-overlay { position: fixed; inset: 0; z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; background: radial-gradient(circle at 50% 25%, #effbf8 0%, #d8f1ed 45%, #c7e7e3 100%); color: var(--ink); }
         .success-icon { width: 80px; height: 80px; display: grid; place-items: center; border-radius: 50%; color: white; background: var(--teal); font-size: 48px; font-weight: 900; margin-bottom: 18px; }
         .success-title { margin: 0; font-size: clamp(30px, 3vw, 54px); font-weight: 900; }
@@ -72,8 +62,7 @@
         .token-label { color: var(--teal-dark); font-size: clamp(19px, 1.6vw, 27px); font-weight: 800; }
         .token-val { color: var(--teal-dark); font-size: clamp(8rem, 18vw, 16rem); line-height: 1.06; font-weight: 900; font-variant-numeric: tabular-nums; direction: ltr; }
         .reset-note { color: var(--muted); font-size: 17px; margin: 0; }
-        @media (max-width: 1050px) { .kiosk-content { grid-template-columns: 1fr; } .queue-column { grid-template-rows: repeat(8, minmax(55px, auto)); } .queue-token { font-size: 30px; } }
-        @media (max-width: 650px) { .kiosk-wrapper { padding: 12px; gap: 12px; } .kiosk-header, .panel { border-radius: 20px; padding: 18px; } .brand-mark { width: 50px; height: 50px; font-size: 30px; border-radius: 14px; } .brand-logo { max-width: 75px; } .brand { gap: 10px; } .brand-subtitle { display: none; } .btn-lang { min-width: 72px; padding: 8px; } .services-grid { grid-template-columns: 1fr; } .service-card { min-height: 150px; } .queue-columns { gap: 8px; } .queue-column { gap: 8px; grid-template-rows: repeat(8, minmax(48px, auto)); } .queue-token { font-size: clamp(20px, 6vw, 28px); } .token-val { font-size: clamp(5rem, 20vw, 8rem); } }
+        @media (max-width: 650px) { .kiosk-wrapper { padding: 12px; gap: 12px; } .kiosk-header, .panel { border-radius: 20px; padding: 18px; } .brand-mark { width: 50px; height: 50px; font-size: 30px; border-radius: 14px; } .brand-logo { max-width: 75px; } .brand { gap: 10px; } .brand-subtitle { display: none; } .btn-lang { min-width: 72px; padding: 8px; } .services-grid { grid-template-columns: 1fr; } .service-card { min-height: 150px; } .token-val { font-size: clamp(5rem, 20vw, 8rem); } }
         @media (prefers-reduced-motion: reduce) { .service-card { transition: none; } }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -100,18 +89,6 @@
                     {% endfor %}
                 </div>
             </section>
-            <aside class="panel queue-panel" aria-labelledby="queue-title">
-                <div class="panel-heading queue-heading"><div><p class="eyebrow">{% if LANGUAGE_CODE == 'ar' %}التذاكر الحالية{% else %}Current tickets{% endif %}</p><h2 class="panel-title" id="queue-title">{% if LANGUAGE_CODE == 'ar' %}قائمة الانتظار{% else %}Waiting queue{% endif %}</h2></div><span class="live-badge">{% if LANGUAGE_CODE == 'ar' %}مباشر{% else %}Live{% endif %}</span></div>
-                <div class="queue-columns">
-                    {% for column in queue_columns %}
-                    <div class="queue-column">
-                        {% for token in column %}<div class="queue-token" dir="ltr" title="{{ token.service.name }}">{{ token.service.prefix }}{{ token.number }}</div>{% endfor %}
-
-                    </div>
-                    {% endfor %}
-                </div>
-                {% if not queue_columns.0 %}<p class="queue-empty">{% if LANGUAGE_CODE == 'ar' %}لا توجد تذاكر في الانتظار حالياً{% else %}No tickets waiting right now{% endif %}</p>{% endif %}
-            </aside>
         </main>
     </div>
     <div id="success-overlay" class="success-overlay" role="status" aria-live="polite">

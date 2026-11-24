@@ -25,15 +25,26 @@ class CounterConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'type': 'token_called',
             'token': event['token'],
+            'token_id': event.get('token_id'),
             'service': event['service'],
             'counter': event['counter'],
             'audio': event.get('audio')
         }))
 
+    async def token_issued(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'token_issued',
+            'token_id': event['token_id'],
+            'full_token': event['full_token'],
+            'service_name': event['service_name'],
+        }))
+
     async def token_audio(self, event):
         await self.send(text_data=json.dumps({
             'type': 'token_audio',
-            'audio': event['audio'],
+            'audio': event.get('audio'),
+            'audio_url': event.get('audio_url'),
+            'token_id': event.get('token_id'),
             'announcement_id': event['announcement_id'],
             'counter_id': event.get('counter_id'),
         }))

@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -19,28 +20,39 @@
         .screen-name { margin: 2px 0 0; font-size: clamp(14px, 1.1vw, 19px); color: var(--muted); }
         .status-badge { display: inline-flex; align-items: center; gap: 10px; background: #eff8f7; border: 1px solid #d1e8e5; border-radius: 999px; padding: 9px 16px; color: var(--teal-dark); font-size: 15px; font-weight: 800; white-space: nowrap; }
         #status-indicator { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #de765f; box-shadow: 0 0 0 4px #f9e9e4; }
-        .screen-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(400px, .7fr); gap: clamp(18px, 2vw, 30px); }
+        .screen-grid { display: flex; flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(400px, .7fr); gap: clamp(18px, 2vw, 30px); }
         .panel { min-width: 0; background: #fff; border: 1px solid var(--line); border-radius: 30px; box-shadow: 0 14px 40px rgba(29, 81, 89, .06); }
-        .current-panel { display: flex; flex-direction: column; justify-content: space-between; align-items: center; text-align: center; overflow: hidden; padding: clamp(28px, 3vw, 55px); background: radial-gradient(circle at 50% 42%, #fff 0%, #f5fbfa 72%); }
+        .current-panel { flex: 1.3; display: flex; flex-direction: column; justify-content: space-between; align-items: center; text-align: center; overflow: hidden; padding: clamp(28px, 3vw, 55px); background: radial-gradient(circle at 50% 42%, #fff 0%, #f5fbfa 72%); }
         .eyebrow { margin: 0 0 8px; color: var(--teal); font-size: clamp(17px, 1.5vw, 27px); font-weight: 800; }
         .current-title { margin: 0; font-size: clamp(30px, 2.8vw, 50px); font-weight: 900; line-height: 1.25; }
+        .current-top { width: 100%; display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+        .current-heading { flex: 1; text-align: center; }
+        .zoom-controls { display: flex; align-items: center; gap: 7px; flex: none; padding: 6px; border: 1px solid #c9e5df; border-radius: 16px; background: #e8f5f2; }
+        .zoom-button { width: 42px; height: 42px; border: 0; border-radius: 11px; background: #fff; color: #08646a; font: 900 28px/1 'Cairo', sans-serif; cursor: pointer; }
+        .zoom-button:focus-visible { outline: 3px solid #087e83; outline-offset: 2px; }
+        .zoom-level { min-width: 54px; color: #08646a; font-size: 15px; font-weight: 800; direction: ltr; text-align: center; }
         .token-container { width: 100%; flex: 1; display: flex; align-items: center; justify-content: center; min-height: 210px; }
-        .token-number { max-width: 100%; margin: 0; font-size: clamp(9rem, 18vw, 23rem); line-height: 1; font-weight: 900; color: var(--teal-dark); white-space: nowrap; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+        .token-number { max-width: 100%; margin: 0; font-size: 12rem; font-size: clamp(9rem, 18vw, 23rem); line-height: 1; font-weight: 900; color: var(--teal-dark); white-space: nowrap; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
         .token-number.new-token { animation: tokenPop .6s ease-out; }
         @keyframes tokenPop { 0% { transform: scale(.76); opacity: .3; } 70% { transform: scale(1.04); } 100% { transform: scale(1); opacity: 1; } }
         .counter-callout { width: 100%; display: flex; align-items: center; justify-content: center; gap: clamp(16px, 2vw, 36px); background: #e8f5f2; border: 1px solid #c9e5df; border-radius: 25px; padding: clamp(18px, 2vw, 32px); }
         .instruction-text { font-size: clamp(23px, 2.2vw, 39px); font-weight: 800; line-height: 1.3; }
         .counter-badge { background: var(--teal); color: white; border-radius: 19px; min-width: 100px; padding: 3px 20px; font-size: clamp(48px, 5vw, 88px); line-height: 1.2; font-weight: 900; font-variant-numeric: tabular-nums; }
-        .queue-panel { display: flex; flex-direction: column; padding: clamp(22px, 2vw, 36px); }
+        .queue-panel { flex: .7; display: flex; flex-direction: column; padding: clamp(22px, 2vw, 36px); }
         .queue-heading { margin-bottom: clamp(18px, 1.8vw, 28px); }
         .queue-label { margin: 0 0 3px; color: var(--teal); font-size: 15px; font-weight: 800; }
         .queue-title { margin: 0; font-size: clamp(27px, 2.3vw, 39px); font-weight: 900; line-height: 1.25; }
-        .queue-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; flex: 1; min-height: 0; }
-        .queue-column { display: grid; grid-template-rows: repeat(8, minmax(50px, 1fr)); gap: 10px; min-width: 0; }
-        .queue-token { display: flex; align-items: center; justify-content: center; min-width: 0; background: #eef7f6; border: 1px solid #d5e9e6; border-radius: 14px; padding: 5px 8px; color: var(--teal-dark); font-size: clamp(25px, 2.3vw, 39px); line-height: 1.15; font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .issued-notice { margin: 0 0 14px; padding: 10px 15px; border: 1px solid #a9d9d1; border-radius: 14px; background: #e3f5ef; color: #08646a; font-size: 18px; font-weight: 800; text-align: center; }
+        .issued-notice[hidden] { display: none; }
+        .issued-notice strong { margin: 0 8px; font-size: 24px; direction: ltr; }
+        .queue-token.new-issued { background: #d3f0df; border-color: #55b795; }
+        .queue-columns { display: flex; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; flex: 1; min-height: 0; }
+        .queue-column { width: 50%; display: block; display: grid; grid-template-rows: repeat(8, minmax(50px, 1fr)); gap: 10px; min-width: 0; }
+        .queue-token { display: flex; min-height: 50px; margin-bottom: 10px; align-items: center; justify-content: center; min-width: 0; background: #eef7f6; border: 1px solid #d5e9e6; border-radius: 14px; padding: 5px 8px; color: var(--teal-dark); font-size: clamp(25px, 2.3vw, 39px); line-height: 1.15; font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; }
         .queue-placeholder { color: #b7d2d0; background: #f8fbfa; border-style: dashed; }
         .queue-empty { margin: 14px 0 0; color: var(--muted); font-size: 16px; text-align: center; }
         .queue-empty[hidden] { display: none; }
+        @supports (display: grid) { .queue-token { margin-bottom: 0; } }
         .audio-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(16, 49, 54, .84); cursor: pointer; }
         .audio-card { max-width: 620px; width: 100%; background: #fff; border-radius: 30px; padding: clamp(32px, 4vw, 60px); text-align: center; box-shadow: 0 30px 80px rgba(0, 0, 0, .18); }
         .audio-icon { width: 74px; height: 74px; margin: 0 auto 22px; display: grid; place-items: center; background: #e5f4f1; border-radius: 22px; color: var(--teal); font-size: 40px; }
@@ -48,7 +60,7 @@
         .audio-hint { margin: 12px 0 28px; color: var(--muted); font-size: 20px; }
         .start-button { display: inline-block; background: var(--teal); color: #fff; border: 0; border-radius: 16px; padding: 11px 38px; font-size: 23px; font-weight: 800; cursor: pointer; }
         @media (max-width: 1050px) { .screen-grid { grid-template-columns: 1fr; } .current-panel { min-height: 520px; } .queue-token { min-height: 58px; font-size: 32px; } }
-        @media (max-width: 650px) { .screen-shell { padding: 12px; gap: 12px; } .screen-header, .panel { border-radius: 20px; } .screen-header { padding: 14px; } .brand-mark { width: 48px; height: 48px; line-height: 48px; font-size: 29px; } .brand-logo { max-height: 48px; max-width: 74px; } .brand-name { font-size: 20px; } .screen-name { font-size: 13px; } .status-badge { padding: 8px; font-size: 0; } .current-panel { min-height: 420px; padding: 22px; } .token-number { font-size: clamp(5rem, 20vw, 10rem); } .counter-callout { flex-wrap: wrap; } .instruction-text { font-size: 22px; } .counter-badge { font-size: 52px; } .queue-panel { padding: 18px; } .queue-columns { gap: 8px; } .queue-column { gap: 8px; } .queue-token { font-size: clamp(22px, 6vw, 30px); min-height: 52px; } }
+        @media (max-width: 650px) { .screen-shell { padding: 12px; gap: 12px; } .screen-header, .panel { border-radius: 20px; } .screen-header { padding: 14px; } .brand-mark { width: 48px; height: 48px; line-height: 48px; font-size: 29px; } .brand-logo { max-height: 48px; max-width: 74px; } .brand-name { font-size: 20px; } .screen-name { font-size: 13px; } .status-badge { padding: 8px; font-size: 0; } .current-panel { min-height: 420px; padding: 22px; } .current-top { flex-direction: column; align-items: center; } .zoom-button { width: 38px; height: 38px; } .token-number { font-size: clamp(5rem, 20vw, 10rem); } .counter-callout { flex-wrap: wrap; } .instruction-text { font-size: 22px; } .counter-badge { font-size: 52px; } .queue-panel { padding: 18px; } .queue-columns { gap: 8px; } .queue-column { gap: 8px; } .queue-token { font-size: clamp(22px, 6vw, 30px); min-height: 52px; } }
         @media (prefers-reduced-motion: reduce) { .token-number.new-token { animation: none; } }
     </style>
 </head>
@@ -59,16 +71,24 @@
                 {% if system_config.logo %}<img src="{{ system_config.logo.url }}" alt="{{ system_config.system_name }}" class="brand-logo">{% else %}<span class="brand-mark" aria-hidden="true">+</span>{% endif %}
                 <div><h1 class="brand-name">{{ system_config.system_name }}</h1><p class="screen-name">{{ screen.name }}</p></div>
             </div>
-            <span class="status-badge"><span id="status-indicator"></span> متصل بالشاشة</span>
+            <span class="status-badge"><span id="status-indicator"></span><span id="status-label">جاري الاتصال</span></span>
         </header>
         <main class="screen-grid">
             <section class="panel current-panel" aria-labelledby="current-title">
-                <div><p class="eyebrow">الدور الحالي</p><h2 class="current-title" id="current-title">رقم التذكرة الحالي</h2></div>
+                <div class="current-top">
+                    <div class="current-heading"><p class="eyebrow">الدور الحالي</p><h2 class="current-title" id="current-title">رقم التذكرة الحالي</h2></div>
+                    <div class="zoom-controls" role="group" aria-label="حجم رقم التذكرة">
+                        <button type="button" class="zoom-button" onclick="changeTokenZoom(-10)" aria-label="تصغير رقم التذكرة">−</button>
+                        <span class="zoom-level" id="token-zoom-level">100%</span>
+                        <button type="button" class="zoom-button" onclick="changeTokenZoom(10)" aria-label="تكبير رقم التذكرة">+</button>
+                    </div>
+                </div>
                 <div class="token-container"><div id="token-display" dir="ltr" class="token-number">{% if current_token %}{{ current_token.service.prefix }}{{ current_token.number }}{% else %}--{% endif %}</div></div>
                 <div class="counter-callout"><span class="instruction-text">يرجى التوجه إلى الشباك</span><span id="counter-badge" dir="ltr" class="counter-badge">{% if current_token %}{{ current_token.counter.number }}{% else %}--{% endif %}</span></div>
             </section>
             <aside class="panel queue-panel" aria-labelledby="queue-title">
                 <div class="queue-heading"><p class="queue-label">التذاكر التالية</p><h2 class="queue-title" id="queue-title">قائمة الانتظار</h2></div>
+                <div id="issued-notice" class="issued-notice" role="status" aria-live="polite" hidden>تم إصدار تذكرة جديدة <strong id="issued-token"></strong></div>
                 <div class="queue-columns">
                     {% for column in queue_columns %}
                     <div class="queue-column" id="queue-column-{{ forloop.counter }}">
@@ -80,137 +100,296 @@
             </aside>
         </main>
     </div>
-    <div id="audio-overlay" class="audio-overlay" onclick="enableAudio()">
-        <div class="audio-card"><div class="audio-icon" aria-hidden="true">♪</div><h2 class="audio-title">النظام جاهز للنداءات الصوتية</h2><p class="audio-hint">اضغط في أي مكان لتفعيل النداءات الصوتية</p><button type="button" class="start-button">بدء النظام</button></div>
+    <div id="audio-overlay" class="audio-overlay" onclick="unlockAudio()">
+        <div class="audio-card"><div class="audio-icon" aria-hidden="true">♪</div><h2 class="audio-title">النظام جاهز للنداءات الصوتية</h2><p class="audio-hint" id="audio-hint">اضغط في أي مكان لتفعيل النداءات الصوتية</p><button type="button" class="start-button">بدء النظام</button></div>
     </div>
+    <audio id="announcement-player" preload="none"></audio>
     <script>
-        const queueUrl = "{% url 'qms_core:api_get_screen_data' screen.device_token %}";
-        const counterNumbers = new Set([{% for counter in counters %}"{{ counter.number }}"{% if not forloop.last %}, {% endif %}{% endfor %}]);
-        const counterIds = [{% for counter in counters %}"{{ counter.id }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
-        const activeConnections = new Set();
-        const playedAnnouncements = new Set();
+        var queueUrl = "{% url 'qms_core:api_get_screen_data' screen.device_token %}";
+        var readySoundUrl = "{% static 'qms_core/audio/ready.wav' %}";
+        var counterIds = [{% for counter in counters %}"{{ counter.id }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
+        var counterNumbers = [{% for counter in counters %}"{{ counter.number }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
+        var currentCallId = {% if current_token %}{{ current_token.id }}{% else %}0{% endif %};
+        var lastAnnouncedCallId = 0;
+        var lastIssuedTokenId = {% if latest_issued %}{{ latest_issued.id }}{% else %}0{% endif %};
+        var lastIssuedFullToken = '';
+        var currentQueueTokens = [];
+        var queueLoaded = false;
+        var issuedNoticeTimer = null;
+        var tokenZoom = 100;
+        var zoomStorageKey = 'qms-screen-token-zoom-{{ screen.id }}';
+        try {
+            var storedZoom = parseInt(window.localStorage.getItem(zoomStorageKey), 10);
+            if (storedZoom >= 60 && storedZoom <= 180) tokenZoom = storedZoom;
+        } catch (error) {}
+        var activeConnections = {};
+        var playedAnnouncements = {};
+        var audioReady = false;
+        var audioProbeFailed = false;
+        var player = document.getElementById('announcement-player');
+
+        function contains(values, value) {
+            for (var i = 0; i < values.length; i++) {
+                if (String(values[i]) === String(value)) return true;
+            }
+            return false;
+        }
 
         function englishDigits(value) {
-            return String(value).replace(/[\u0660-\u0669\u06f0-\u06f9]/g, digit => {
-                const code = digit.charCodeAt(0);
+            return String(value).replace(/[\u0660-\u0669\u06f0-\u06f9]/g, function(digit) {
+                var code = digit.charCodeAt(0);
                 return String.fromCharCode(48 + (code >= 0x06f0 ? code - 0x06f0 : code - 0x0660));
             });
         }
-        
-        function playAnnouncement(data) {
-            if (!data.audio) return;
-            if (data.announcement_id) {
-                if (playedAnnouncements.has(data.announcement_id)) return;
-                playedAnnouncements.add(data.announcement_id);
-                setTimeout(() => playedAnnouncements.delete(data.announcement_id), 60000);
-            }
 
-            const audio = new Audio("data:audio/mp3;base64," + data.audio);
-            audio.play().catch(e => console.error("Audio play failed:", e));
+        function setAudioMessage(message) {
+            document.getElementById('audio-hint').innerHTML = message;
+            document.getElementById('audio-overlay').style.display = 'flex';
+        }
+
+        function audioFailed() {
+            audioReady = false;
+            setAudioMessage('تعذر تشغيل الصوت. تأكد من مستوى الصوت ثم اضغط للمحاولة مرة أخرى.');
+        }
+
+        function unlockAudio() {
+            if (audioProbeFailed) {
+                audioReady = true;
+                document.getElementById('audio-overlay').style.display = 'none';
+                return;
+            }
+            var finished = false;
+            var timeout;
+            function ready() {
+                if (finished) return;
+                finished = true;
+                clearTimeout(timeout);
+                audioReady = true;
+                document.getElementById('audio-overlay').style.display = 'none';
+                player.onplay = null;
+            }
+            function failed() {
+                if (finished) return;
+                finished = true;
+                clearTimeout(timeout);
+                audioProbeFailed = true;
+                setAudioMessage('تعذر تشغيل نغمة الاختبار. اضغط مرة أخرى لتجربة النداءات الصوتية.');
+            }
+            player.onplay = ready;
+            player.onerror = failed;
+            player.src = readySoundUrl;
+            timeout = setTimeout(failed, 2500);
+            try {
+                var result = player.play();
+                if (result && typeof result.then === 'function') {
+                    result.then(ready, failed);
+                }
+            } catch (error) {
+                failed();
+            }
+        }
+
+        function playAnnouncement(data) {
+            if (!data.audio_url && !data.audio) return;
+            if (!audioReady) {
+                setAudioMessage('اضغط لتفعيل النداءات الصوتية.');
+                return;
+            }
+            if (data.token_id && Number(data.token_id) === Number(lastAnnouncedCallId)) return;
+            if (data.announcement_id && playedAnnouncements[data.announcement_id]) return;
+            if (data.announcement_id) playedAnnouncements[data.announcement_id] = true;
+
+            var source = data.audio_url || ('data:audio/mpeg;base64,' + data.audio);
+            var triedFallback = false;
+            player.onplay = function() {
+                if (data.token_id) lastAnnouncedCallId = Number(data.token_id);
+                player.onplay = null;
+            };
+            player.onerror = function() {
+                if (!triedFallback && data.audio && data.audio_url) {
+                    triedFallback = true;
+                    player.src = 'data:audio/mpeg;base64,' + data.audio;
+                    tryPlay();
+                } else {
+                    audioFailed();
+                }
+            };
+            function tryPlay() {
+                try {
+                    var result = player.play();
+                    if (result && typeof result.then === 'function') {
+                        result.then(null, function() { player.onerror(); });
+                    }
+                } catch (error) {
+                    player.onerror();
+                }
+            }
+            player.src = source;
+            tryPlay();
+        }
+
+        function applyTokenZoom() {
+            var display = document.getElementById('token-display');
+            var container = display.parentNode;
+            var numberText = display.textContent || display.innerText || '--';
+            var availableWidth = container.clientWidth || window.innerWidth * 0.55;
+            var availableHeight = container.clientHeight || window.innerHeight * 0.45;
+            var desiredSize = window.innerWidth * 0.18 * tokenZoom / 100;
+            var widthLimit = availableWidth / (Math.max(numberText.length, 2) * 0.62);
+            var size = Math.max(48, Math.min(desiredSize, widthLimit, availableHeight * 0.9));
+            display.style.fontSize = Math.round(size) + 'px';
+            document.getElementById('token-zoom-level').innerHTML = tokenZoom + '%';
+        }
+
+        function changeTokenZoom(step) {
+            tokenZoom = Math.max(60, Math.min(180, tokenZoom + step));
+            applyTokenZoom();
+            try { window.localStorage.setItem(zoomStorageKey, String(tokenZoom)); } catch (error) {}
         }
 
         function updateDisplay(tokenText, counterNum) {
-            const tokenDisplay = document.getElementById('token-display');
-            tokenDisplay.innerText = englishDigits(tokenText);
-            tokenDisplay.classList.remove('new-token');
-            void tokenDisplay.offsetWidth; 
-            tokenDisplay.classList.add('new-token');
-
-            document.getElementById('counter-badge').innerText = englishDigits(counterNum);
-        }
-
-        function connectCounter(id) {
-            if (activeConnections.has(id)) return;
-
-            const wsUrl = (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + '/ws/counter/' + id + '/';
-            const ws = new WebSocket(wsUrl);
-
-            ws.onopen = () => {
-                console.log("Joined Counter Group: " + id);
-                activeConnections.add(id);
-                updateStatus(true);
-            };
-
-            ws.onmessage = function(e) {
-                const data = JSON.parse(e.data);
-                if (data.type === 'token_called') {
-                    if (counterNumbers.has(String(data.counter))) {
-                        updateDisplay(data.service + data.token, data.counter);
-                        if (data.audio) playAnnouncement(data);
-                    }
-                } else if (data.type === 'token_audio') {
-                    if (counterIds.includes(String(data.counter_id))) playAnnouncement(data);
-                } else if (data.type === 'token_cleared') {
-                    updateDisplay("--", "--");
-                } else if (data.type === 'queue_changed') {
-                    refreshQueue();
-                }
-            };
-
-            ws.onclose = () => {
-                activeConnections.delete(id);
-                updateStatus(activeConnections.size > 0);
-                setTimeout(() => connectCounter(id), 5000);
-            };
-
-            ws.onerror = () => ws.close();
-        }
-
-        function connectAll() {
-            if (counterIds.length === 0) {
-                console.error("No counters are assigned to this screen.");
-                return;
-            }
-            counterIds.forEach(connectCounter);
+            var tokenDisplay = document.getElementById('token-display');
+            while (tokenDisplay.firstChild) tokenDisplay.removeChild(tokenDisplay.firstChild);
+            tokenDisplay.appendChild(document.createTextNode(englishDigits(tokenText)));
+            tokenDisplay.className = 'token-number';
+            tokenDisplay.offsetWidth;
+            tokenDisplay.className = 'token-number new-token';
+            var counterDisplay = document.getElementById('counter-badge');
+            while (counterDisplay.firstChild) counterDisplay.removeChild(counterDisplay.firstChild);
+            counterDisplay.appendChild(document.createTextNode(englishDigits(counterNum)));
+            applyTokenZoom();
         }
 
         function updateStatus(connected) {
-            const indicator = document.getElementById('status-indicator');
-            if (connected) {
-                indicator.style.background = '#22c55e';
-                indicator.style.boxShadow = '0 0 10px #22c55e';
-            } else {
-                indicator.style.background = '#ef4444';
-                indicator.style.boxShadow = '0 0 10px #ef4444';
-            }
+            var indicator = document.getElementById('status-indicator');
+            indicator.style.background = connected ? '#39a681' : '#de765f';
+            document.getElementById('status-label').innerHTML = connected ? 'متصل بالشاشة' : 'تحديث تلقائي';
         }
 
-        function enableAudio() {
-            document.getElementById('audio-overlay').style.display = 'none';
-            // Simple interaction to unlock audio
-            new Audio().play().catch(() => {});
+        function connectCounter(id) {
+            if (!window.WebSocket || activeConnections[id]) return;
+            var wsUrl = (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + '/ws/counter/' + id + '/';
+            var ws;
+            try { ws = new WebSocket(wsUrl); } catch (error) { updateStatus(false); return; }
+            activeConnections[id] = ws;
+            ws.onopen = function() { updateStatus(true); };
+            ws.onmessage = function(event) {
+                var data;
+                try { data = JSON.parse(event.data); } catch (error) { return; }
+                if (data.type === 'token_called' && contains(counterNumbers, data.counter)) {
+                    updateDisplay(data.service + data.token, data.counter);
+                    if (data.token_id) currentCallId = Number(data.token_id);
+                    if (data.audio || data.audio_url) playAnnouncement(data);
+                } else if (data.type === 'token_audio' && contains(counterIds, data.counter_id)) {
+                    playAnnouncement(data);
+                } else if (data.type === 'token_cleared') {
+                    updateDisplay('--', '--');
+                    currentCallId = 0;
+                } else if (data.type === 'token_issued') {
+                    handleIssuedToken(data);
+                } else if (data.type === 'queue_changed') {
+                    refreshData();
+                }
+            };
+            ws.onclose = function() {
+                delete activeConnections[id];
+                updateStatus(false);
+                setTimeout(function() { connectCounter(id); }, 5000);
+            };
+            ws.onerror = function() { ws.close(); };
+        }
+
+        function showIssuedNotice(fullToken) {
+            if (!fullToken) return;
+            lastIssuedFullToken = String(fullToken);
+            var number = document.getElementById('issued-token');
+            while (number.firstChild) number.removeChild(number.firstChild);
+            number.appendChild(document.createTextNode(lastIssuedFullToken));
+            var notice = document.getElementById('issued-notice');
+            notice.removeAttribute('hidden');
+            notice.style.display = 'block';
+            if (issuedNoticeTimer) clearTimeout(issuedNoticeTimer);
+            issuedNoticeTimer = setTimeout(function() {
+                notice.style.display = 'none';
+                notice.setAttribute('hidden', 'hidden');
+                lastIssuedFullToken = '';
+                if (queueLoaded) renderQueue(currentQueueTokens);
+            }, 5000);
+        }
+
+        function handleIssuedToken(data) {
+            if (!data || Number(data.token_id) <= Number(lastIssuedTokenId)) return;
+            lastIssuedTokenId = Number(data.token_id);
+            showIssuedNotice(data.full_token);
+            if (queueLoaded && !contains(currentQueueTokens, data.full_token) && currentQueueTokens.length < 16) {
+                var updatedQueue = currentQueueTokens.slice(0);
+                updatedQueue.push(data.full_token);
+                renderQueue(updatedQueue);
+            }
+            refreshData();
         }
 
         function renderQueue(tokens) {
-            const columns = [document.getElementById('queue-column-1'), document.getElementById('queue-column-2')];
-            columns.forEach((column, columnIndex) => {
-                column.replaceChildren();
-                for (let row = 0; row < 8; row++) {
-                    const token = tokens[columnIndex * 8 + row];
-                    const cell = document.createElement('div');
+            currentQueueTokens = tokens.slice(0, 16);
+            queueLoaded = true;
+            for (var columnIndex = 0; columnIndex < 2; columnIndex++) {
+                var column = document.getElementById('queue-column-' + (columnIndex + 1));
+                while (column.firstChild) column.removeChild(column.firstChild);
+                for (var row = 0; row < 8; row++) {
+                    var token = tokens[columnIndex * 8 + row];
+                    var cell = document.createElement('div');
                     cell.className = token ? 'queue-token' : 'queue-token queue-placeholder';
+                    if (token && token === lastIssuedFullToken) cell.className += ' new-issued';
                     cell.dir = 'ltr';
-                    cell.textContent = token || '—';
+                    cell.appendChild(document.createTextNode(token || '—'));
                     column.appendChild(cell);
                 }
-            });
-            document.getElementById('queue-empty').hidden = tokens.length > 0;
-        }
-
-        async function refreshQueue() {
-            try {
-                const response = await fetch(queueUrl, {cache: 'no-store'});
-                if (!response.ok) throw new Error(`Queue request failed: ${response.status}`);
-                const data = await response.json();
-                renderQueue(data.queue || []);
-            } catch (error) {
-                console.error('Could not refresh the waiting queue:', error);
+            }
+            var emptyMessage = document.getElementById('queue-empty');
+            if (tokens.length) {
+                emptyMessage.style.display = 'none';
+                emptyMessage.setAttribute('hidden', 'hidden');
+            } else {
+                emptyMessage.removeAttribute('hidden');
+                emptyMessage.style.display = 'block';
             }
         }
 
-        connectAll();
-        refreshQueue();
-        setInterval(refreshQueue, 30000);
+        function refreshData() {
+            var request = new XMLHttpRequest();
+            request.open('GET', queueUrl + '?_=' + new Date().getTime(), true);
+            request.onreadystatechange = function() {
+                if (request.readyState !== 4 || request.status !== 200) return;
+                var data;
+                try { data = JSON.parse(request.responseText); } catch (error) { return; }
+                if (data.latest_issued && Number(data.latest_issued.id) > Number(lastIssuedTokenId)) {
+                    lastIssuedTokenId = Number(data.latest_issued.id);
+                    showIssuedNotice(data.latest_issued.full_token);
+                }
+                renderQueue(data.queue || []);
+                if (data.current_call) {
+                    var call = data.current_call;
+                    if (Number(call.id) !== Number(currentCallId)) {
+                        updateDisplay(call.full_token, call.counter_number);
+                        currentCallId = Number(call.id);
+                    }
+                    if (call.audio_url && Number(call.id) !== Number(lastAnnouncedCallId)) {
+                        playAnnouncement({audio_url: call.audio_url, token_id: call.id});
+                    }
+                } else if (currentCallId) {
+                    updateDisplay('--', '--');
+                    currentCallId = 0;
+                }
+            };
+            request.send(null);
+        }
+
+        applyTokenZoom();
+        window.onresize = applyTokenZoom;
+        updateStatus(false);
+        for (var i = 0; i < counterIds.length; i++) connectCounter(counterIds[i]);
+        refreshData();
+        setInterval(refreshData, 3000);
     </script>
 </body>
 </html>
