@@ -17,6 +17,9 @@
             text-align: center;
             position: relative;
         }
+        .ticket-brand { display: flex; align-items: center; justify-content: center; gap: 2mm; min-height: 9mm; margin-bottom: 1mm; }
+        .ticket-logo { display: block; max-width: 13mm; max-height: 9mm; object-fit: contain; flex: none; }
+        .org-name { font-size: 1.15rem; font-weight: 800; line-height: 1.15; margin: 0; overflow-wrap: break-word; }
         .prefix-badge {
             position: absolute;
             top: 10px;
@@ -50,6 +53,7 @@
                 margin: 0 auto;
                 padding: 2mm 0 1mm;
             }
+            .prefix-badge { position: static; display: inline-block; margin: 0 0 1mm; }
             .ticket-number { font-size: 5rem; margin: 0.1rem 0; }
             .ticket-card hr { margin: 0.25rem 0; }
             .ticket-card p { margin-bottom: 0.1rem; }
@@ -59,6 +63,10 @@
 </head>
 <body onload="setTimeout(() => window.print(), 300)">
     <div class="ticket-card">
+        <div class="ticket-brand">
+            {% if system_config.logo %}<img class="ticket-logo" src="{{ system_config.logo.url }}" alt="{{ system_config.system_name }}">{% endif %}
+            <h2 class="org-name">{{ system_config.system_name|default:"QMS System" }}</h2>
+        </div>
         <div class="prefix-badge">{{ token.service.prefix }}</div>
         <div class="service-name">{{ token.service.name }}</div>
         <hr>

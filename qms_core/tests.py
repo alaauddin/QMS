@@ -40,6 +40,20 @@ class TokenCreationTests(TestCase):
         self.assertEqual(Token.objects.count(), 1)
         self.assertContains(response, '<div class="token-number">1</div>', html=True)
 
+    def test_printed_tickets_use_configured_hospital_name_and_logo(self):
+        config = SystemConfig.get_config()
+        config.system_name = "Hospital Al Salam"
+        config.logo = "system/hospital-logo.png"
+        config.save(update_fields=["system_name", "logo"])
+
+        for url in (self.web_url + "?format=print", self.web_url):
+            response = self.client.post(url)
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, "Hospital Al Salam")
+            self.assertContains(response, 'class="ticket-logo"')
+            self.assertContains(response, 'src="/media/system/hospital-logo.png"')
+            self.assertNotContains(response, "QMS SYSTEM")
+
     def test_current_csrf_cookie_works_after_cookie_rotation(self):
         client = Client(enforce_csrf_checks=True)
         client.get(reverse("qms_core:kiosk"))
