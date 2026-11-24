@@ -475,9 +475,12 @@
                 setAudioMessage('اضغط لتفعيل النداءات الصوتية.');
                 return;
             }
-            if (data.token_id && Number(data.token_id) === Number(lastAnnouncedCallId)) return;
-            if (data.announcement_id && playedAnnouncements[data.announcement_id]) return;
-            if (data.announcement_id) playedAnnouncements[data.announcement_id] = true;
+            if (data.announcement_id) {
+                if (playedAnnouncements[data.announcement_id]) return;
+                playedAnnouncements[data.announcement_id] = true;
+            } else if (data.token_id && Number(data.token_id) === Number(lastAnnouncedCallId)) {
+                return;
+            }
 
             var source = data.audio_url || ('data:audio/mpeg;base64,' + data.audio);
             var triedFallback = false;
@@ -491,6 +494,7 @@
                     player.src = 'data:audio/mpeg;base64,' + data.audio;
                     tryPlay();
                 } else {
+                    if (data.announcement_id) delete playedAnnouncements[data.announcement_id];
                     audioFailed();
                 }
             };
@@ -653,8 +657,8 @@
                         updateDisplay(call.full_token, call.counter_number);
                         currentCallId = Number(call.id);
                     }
-                    if (call.audio_url && Number(call.id) !== Number(lastAnnouncedCallId)) {
-                        playAnnouncement({audio_url: call.audio_url, token_id: call.id});
+                    if (call.audio_url && (!call.announcement_id || !playedAnnouncements[call.announcement_id])) {
+                        playAnnouncement({audio_url: call.audio_url, token_id: call.id, announcement_id: call.announcement_id});
                     }
                 } else if (currentCallId) {
                     updateDisplay('--', '--');

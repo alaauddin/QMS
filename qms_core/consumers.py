@@ -26,6 +26,7 @@ class CounterConsumer(AsyncWebsocketConsumer):
             'type': 'token_called',
             'token': event['token'],
             'token_id': event.get('token_id'),
+            'announcement_id': event.get('announcement_id'),
             'service': event['service'],
             'counter': event['counter'],
             'audio': event.get('audio')

@@ -1,4 +1,6 @@
 from django.test import Client, TestCase, override_settings
+from django.contrib.auth.models import User
+from unittest.mock import patch
 import hashlib
 import json
 import tempfile
@@ -9,7 +11,7 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
 from .consumers import CounterConsumer
-from .models import Counter, Screen, Service, SystemConfig, Token
+from .models import Counter, CounterAssignment, Screen, Service, SystemConfig, Token
 from .views import call_voice_text
 
 
@@ -179,3 +181,47 @@ class ScreenAudioEventTests(TestCase):
 
         self.assertEqual(messages[0]["type"], "token_issued")
         self.assertEqual(messages[0]["full_token"], "R21")
+
+
+@override_settings(CHANNEL_LAYERS={
+    "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
+})
+class RecallAnnouncementTests(TestCase):
+    def test_each_recall_gets_a_new_announcement_id_for_screen_and_audio(self):
+        user = User.objects.create_user(username="operator", password="test-password")
+        service = Service.objects.create(name="Registration", prefix="R")
+        counter = Counter.objects.create(number=3)
+        CounterAssignment.objects.create(user=user, counter=counter, is_active=True)
+        screen = Screen.objects.create(name="Main lobby", device_token="main-lobby")
+        screen.counters.add(counter)
+        token = Token.objects.create(
+            number=7, service=service, status="called",
+            counter=counter, called_at=timezone.now(),
+        )
+        layer = get_channel_layer()
+        channel = async_to_sync(layer.new_channel)()
+        async_to_sync(layer.group_add)("queue_updates", channel)
+        self.client.force_login(user)
+
+        ids = []
+        with patch("qms_core.views.threading.Thread") as worker:
+            for _ in range(2):
+                response = self.client.get(reverse("qms_core:recall_token"))
+                self.assertEqual(response.status_code, 200)
+                self.assertTrue(response.json()["success"])
+                event = async_to_sync(layer.receive)(channel)
+                self.assertEqual(event["type"], "token_called")
+                self.assertEqual(event["token_id"], token.id)
+                self.assertEqual(async_to_sync(layer.receive)(channel)["type"], "queue_changed")
+                ids.append(event["announcement_id"])
+                self.assertEqual(
+                    self.client.get(reverse("qms_core:api_get_screen_data", args=[screen.device_token]))
+                    .json()["current_call"]["announcement_id"],
+                    ids[-1],
+                )
+
+        self.assertNotEqual(ids[0], ids[1])
+        self.assertEqual(worker.call_count, 2)
+        self.assertEqual(worker.call_args.args[1]["args"][-1], ids[-1])
+        token.refresh_from_db()
+        self.assertEqual(token.announcement_id, ids[-1])

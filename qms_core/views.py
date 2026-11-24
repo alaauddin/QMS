@@ -66,7 +66,7 @@ def cached_call_audio_url(token):
     return f"{settings.MEDIA_URL.rstrip('/')}/audio_cache/{file_hash}.mp3"
 
 
-def _async_tts_broadcast(token_id, counter_id, text):
+def _async_tts_broadcast(token_id, counter_id, text, announcement_id):
     """
     Background worker to generate Neural Edge-TTS and broadcast only the audio.
     """
@@ -141,7 +141,7 @@ def _async_tts_broadcast(token_id, counter_id, text):
                     'audio_url': audio_url,
                     'token_id': token_id,
                     'counter_id': counter_id_val,
-                    'announcement_id': uuid.uuid4().hex,
+                    'announcement_id': announcement_id,
                 }
             )
         except Exception as e:
@@ -156,6 +156,8 @@ def broadcast_token_call(token, serving_counter):
     """
     Broadcasts token update immediately, then generates audio in background.
     """
+    token.announcement_id = uuid.uuid4().hex
+    token.save(update_fields=['announcement_id'])
     channel_layer = get_channel_layer()
     
     # 1. Global Call Update (Visual)
@@ -166,6 +168,7 @@ def broadcast_token_call(token, serving_counter):
             'type': 'token_called',
             'token': str(token.number),
             'token_id': token.id,
+            'announcement_id': token.announcement_id,
             'service': token.service.prefix,
             'service_name': token.service.name,
             'counter': serving_counter.number,
@@ -181,7 +184,7 @@ def broadcast_token_call(token, serving_counter):
     voice_text = call_voice_text(token.number, serving_counter.number)
     threading.Thread(
         target=_async_tts_broadcast, 
-        args=(token.id, serving_counter.id, voice_text),
+        args=(token.id, serving_counter.id, voice_text, token.announcement_id),
         daemon=True
     ).start()
 

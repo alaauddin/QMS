@@ -191,6 +191,7 @@ def api_get_screen_data(request, device_token):
         } if latest_issued else None,
         'current_call': {
             'id': current_call.id,
+            'announcement_id': current_call.announcement_id,
             'full_token': str(current_call),
             'counter_number': current_call.counter.number,
             'audio_url': cached_call_audio_url(current_call),
