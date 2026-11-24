@@ -1,10 +1,10 @@
 {% load i18n %}
 <!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% trans "Customer Kiosk" %}</title>
+    <title>كشك إصدار التذاكر</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -88,20 +88,19 @@
         <header class="kiosk-header">
             <div class="brand">
                 {% if system_config.logo %}<img class="brand-logo" src="{{ system_config.logo.url }}" alt="{{ system_config.system_name }}">{% else %}<div class="brand-mark" aria-hidden="true">+</div>{% endif %}
-                <div><h1 class="brand-name">{{ system_config.system_name|default:"Welcome" }}</h1><p class="brand-subtitle">{% if LANGUAGE_CODE == 'ar' %}نظام انتظار المرضى{% else %}Patient queue management{% endif %}</p></div>
+                <div><h1 class="brand-name">{% if system_config.system_name == "QMS System" %}نظام انتظار المرضى{% else %}{{ system_config.system_name|default:"نظام انتظار المرضى" }}{% endif %}</h1><p class="brand-subtitle">نظام انتظار المرضى</p></div>
             </div>
-            {% if LANGUAGE_CODE == 'ar' %}<a href="/en/qms/kiosk/" class="btn-lang">English</a>{% else %}<a href="/ar/qms/kiosk/" class="btn-lang">العربية</a>{% endif %}
         </header>
         <main class="kiosk-content">
             <section class="panel" aria-labelledby="services-title">
-                <div class="panel-heading"><div><p class="eyebrow">{% if LANGUAGE_CODE == 'ar' %}ابدأ من هنا{% else %}Start here{% endif %}</p><h2 class="panel-title" id="services-title">{% if LANGUAGE_CODE == 'ar' %}اختر الخدمة{% else %}Choose a service{% endif %}</h2><p class="panel-note">{% if LANGUAGE_CODE == 'ar' %}اضغط على الخدمة للحصول على تذكرتك{% else %}Tap a service to get your ticket{% endif %}</p></div></div>
+                <div class="panel-heading"><div><p class="eyebrow">ابدأ من هنا</p><h2 class="panel-title" id="services-title">اختر الخدمة</h2><p class="panel-note">اضغط على الخدمة للحصول على تذكرتك</p></div></div>
                 <div class="services-grid">
                     {% for item in services_data %}
                     <button type="button" class="service-card" onclick="handleServiceSelect('{{ item.obj.id }}')">
                         <span class="card-top"><span class="icon-box" aria-hidden="true"><i class="{{ item.obj.icon_class|default:'fas fa-stethoscope' }}"></i></span><span class="service-title">{{ item.obj.name }}</span></span>
                         {% if item.obj.description %}<span class="service-desc">{{ item.obj.description }}</span>{% endif %}
-                        <span class="tap-action"><span class="tap-hand" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M8 13V5a2 2 0 0 1 4 0v6M12 11V9a2 2 0 0 1 4 0v3M16 12a2 2 0 0 1 4 0v4c0 3.3-2.7 6-6 6h-2c-2 0-3.4-.7-4.5-2L3 15.5a2 2 0 0 1 2.8-2.8L8 15M4 4 2 2M4 8H1"/></svg></span><span>{% if LANGUAGE_CODE == 'ar' %}اضغط هنا لاختيار الخدمة{% else %}Tap to choose this service{% endif %}</span></span>
-                        <span class="service-footer"><span>{% trans "Waiting" %}: <b id="wait-count-{{ item.obj.id }}">{{ item.waiting_count }}</b></span><span id="ewt-wrap-{{ item.obj.id }}" {% if not item.ewt %}hidden{% endif %}>{% trans "Est. Wait" %}: <b id="ewt-{{ item.obj.id }}">{% if item.ewt %}{{ item.ewt }}m{% endif %}</b></span></span>
+                        <span class="tap-action"><span class="tap-hand" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M8 13V5a2 2 0 0 1 4 0v6M12 11V9a2 2 0 0 1 4 0v3M16 12a2 2 0 0 1 4 0v4c0 3.3-2.7 6-6 6h-2c-2 0-3.4-.7-4.5-2L3 15.5a2 2 0 0 1 2.8-2.8L8 15M4 4 2 2M4 8H1"/></svg></span><span>اضغط هنا لاختيار الخدمة</span></span>
+                        <span class="service-footer"><span>المنتظرون: <b id="wait-count-{{ item.obj.id }}">{{ item.waiting_count }}</b></span><span id="ewt-wrap-{{ item.obj.id }}" {% if not item.ewt %}hidden{% endif %}>الانتظار المتوقع: <b id="ewt-{{ item.obj.id }}">{% if item.ewt %}{{ item.ewt }} د{% endif %}</b></span></span>
                     </button>
                     {% endfor %}
                 </div>
@@ -110,13 +109,13 @@
     </div>
     <div id="success-overlay" class="success-overlay" role="status" aria-live="polite">
         <div class="success-icon" aria-hidden="true">✓</div>
-        <h2 class="success-title">{% trans "Thank You!" %}</h2>
-        <p class="success-hint">{% trans "Please take your token and wait for your turn" %}</p>
-        <div class="token-display-box"><div class="token-label">{% trans "Your Token Number" %}</div><div id="final-token-val" class="token-val">--</div></div>
-        <p class="reset-note">{% if LANGUAGE_CODE == 'ar' %}جاري طباعة تذكرتك{% else %}Printing your ticket{% endif %}</p>
+        <h2 class="success-title">شكراً لك</h2>
+        <p class="success-hint">يرجى أخذ تذكرتك وانتظار دورك</p>
+        <div class="token-display-box"><div class="token-label">رقم تذكرتك</div><div id="final-token-val" class="token-val">--</div></div>
+        <p class="reset-note">جاري طباعة تذكرتك</p>
     </div>
     <form id="token-request-form" hidden>{% csrf_token %}</form>
-    <iframe id="print-frame" title="Print ticket" style="position:absolute;opacity:0;pointer-events:none;height:1px;width:1px;"></iframe>
+    <iframe id="print-frame" title="طباعة التذكرة" style="position:absolute;opacity:0;pointer-events:none;height:1px;width:1px;"></iframe>
     <script>
         let isProcessing = false;
 
@@ -136,7 +135,7 @@
                         const waitWrap = document.getElementById('ewt-wrap-' + service.id);
                         if (count) count.textContent = service.waiting_count;
                         if (wait && waitWrap) {
-                            wait.textContent = service.ewt ? service.ewt + 'm' : '';
+                            wait.textContent = service.ewt ? service.ewt + ' د' : '';
                             waitWrap.hidden = !service.ewt;
                         }
                     });
@@ -221,7 +220,7 @@
                 })
                 .catch(err => {
                     console.error('Kiosk Error:', err);
-                    alert('{% trans "Error generating token. Please contact staff." %}');
+                    alert('تعذر إصدار التذكرة. يرجى التواصل مع الموظف.');
                     resetKiosk();
                 });
         }
