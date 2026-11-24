@@ -286,49 +286,25 @@
         .queue-placeholder { border-right-color: #dfeae8; background: #fbfcfc; color: #b7d2d0; }
         .queue-empty { margin: 14px 0 0; color: #60787d; font-size: 16px; text-align: center; }
         .queue-empty[hidden] { display: none; }
-        .audio-overlay {
-            position: fixed;
-            top: 0; right: 0; bottom: 0; left: 0;
-            z-index: 9999;
-            display: flex;
+        .audio-control {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 24px;
-            background: rgba(9, 38, 45, .86);
+            gap: 8px;
+            min-height: 48px;
+            padding: 8px 14px;
+            border: 1px solid #cfddd9;
+            border-radius: 12px;
+            background: #f6f9f8;
+            color: #245862;
+            font: 800 15px 'Cairo', Tahoma, Arial, sans-serif;
+            white-space: nowrap;
             cursor: pointer;
         }
-        .audio-card {
-            width: 100%;
-            max-width: 620px;
-            padding: 48px;
-            border-radius: 24px;
-            background: #fff;
-            text-align: center;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, .18);
-        }
-        .audio-icon {
-            width: 74px;
-            height: 74px;
-            margin: 0 auto 22px;
-            border-radius: 20px;
-            background: #e5f4f1;
-            color: #087e83;
-            font-size: 40px;
-            line-height: 74px;
-            text-align: center;
-        }
-        .audio-title { margin: 0; font-size: 34px; font-weight: 900; }
-        .audio-hint { margin: 12px 0 28px; color: #60787d; font-size: 20px; }
-        .start-button {
-            display: inline-block;
-            padding: 11px 38px;
-            border: 0;
-            border-radius: 13px;
-            background: #087e83;
-            color: #fff;
-            font: 800 23px 'Cairo', Tahoma, Arial, sans-serif;
-            cursor: pointer;
-        }
+        .audio-control:hover, .audio-control:focus { background: #e5f4f1; }
+        .audio-control:focus { outline: 3px solid #087e83; outline-offset: 2px; }
+        .audio-control[hidden] { display: none; }
+        .audio-control-icon { font: 900 22px/1 Arial, sans-serif; }
         .screen-shell.screen-zoom-compact .queue-panel { padding: 18px; }
         .screen-shell.screen-zoom-compact .queue-heading { margin-bottom: 9px; padding-bottom: 9px; }
         .screen-shell.screen-zoom-compact .queue-column { gap: 5px; }
@@ -345,7 +321,8 @@
             .screen-shell { padding: 10px; gap: 10px; }
             .screen-header, .panel { border-radius: 16px; }
             .screen-header { min-height: 70px; padding: 12px; flex-wrap: wrap; }
-            .header-actions { width: 100%; justify-content: space-between; gap: 8px; }
+            .header-actions { width: 100%; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+            .audio-control { min-height: 40px; padding: 6px 10px; font-size: 13px; }
             .screen-zoom-label { font-size: 12px; }
             .screen-zoom-button { width: 32px; height: 32px; }
             .brand { gap: 9px; }
@@ -371,8 +348,6 @@
             .queue-columns { gap: 7px; }
             .queue-column { gap: 7px; }
             .queue-token { font-size: 24px; }
-            .audio-card { padding: 30px 20px; }
-            .audio-title { font-size: 27px; }
         }
         @media (prefers-reduced-motion: reduce) { .token-number.new-token { animation: none; } }
     </style>
@@ -392,6 +367,9 @@
                     <button type="button" class="screen-zoom-button" onclick="changeScreenZoom(10)" aria-label="تكبير الشاشة">+</button>
                 </div>
                 <span class="status-badge"><span id="status-indicator"></span><span id="status-label">جاري الاتصال</span></span>
+                <button type="button" id="audio-control" class="audio-control" onclick="unlockAudio()" title="اضغط لتفعيل النداءات الصوتية">
+                    <span class="audio-control-icon" aria-hidden="true">♪</span><span id="audio-control-label">تفعيل الصوت</span>
+                </button>
             </div>
         </header>
         <main class="screen-grid">
@@ -421,9 +399,6 @@
             </aside>
         </main>
     </div>
-    <div id="audio-overlay" class="audio-overlay" onclick="unlockAudio()">
-        <div class="audio-card"><div class="audio-icon" aria-hidden="true">♪</div><h2 class="audio-title">النظام جاهز للنداءات الصوتية</h2><p class="audio-hint" id="audio-hint">اضغط في أي مكان لتفعيل النداءات الصوتية</p><button type="button" class="start-button">بدء النظام</button></div>
-    </div>
     <audio id="announcement-player" preload="none"></audio>
     <script>
         var queueUrl = "{% url 'qms_core:api_get_screen_data' screen.device_token %}";
@@ -450,7 +425,7 @@
         var activeConnections = {};
         var playedAnnouncements = {};
         var audioReady = false;
-        var audioProbeFailed = false;
+        var pendingAnnouncement = null;
         var player = document.getElementById('announcement-player');
 
         function contains(values, value) {
@@ -467,22 +442,26 @@
             });
         }
 
-        function setAudioMessage(message) {
-            document.getElementById('audio-hint').innerHTML = message;
-            document.getElementById('audio-overlay').style.display = 'flex';
+        function showAudioControl(message) {
+            var control = document.getElementById('audio-control');
+            document.getElementById('audio-control-label').innerHTML = message;
+            control.removeAttribute('hidden');
+            control.style.display = 'inline-flex';
+        }
+
+        function hideAudioControl() {
+            var control = document.getElementById('audio-control');
+            control.style.display = 'none';
+            control.setAttribute('hidden', 'hidden');
         }
 
         function audioFailed() {
             audioReady = false;
-            setAudioMessage('تعذر تشغيل الصوت. تأكد من مستوى الصوت ثم اضغط للمحاولة مرة أخرى.');
+            showAudioControl('تفعيل الصوت');
+            document.getElementById('audio-control').title = 'تعذر تشغيل الصوت. اضغط لإعادة المحاولة.';
         }
 
         function unlockAudio() {
-            if (audioProbeFailed) {
-                audioReady = true;
-                document.getElementById('audio-overlay').style.display = 'none';
-                return;
-            }
             var finished = false;
             var timeout;
             function ready() {
@@ -490,15 +469,19 @@
                 finished = true;
                 clearTimeout(timeout);
                 audioReady = true;
-                document.getElementById('audio-overlay').style.display = 'none';
+                hideAudioControl();
                 player.onplay = null;
+                if (pendingAnnouncement) {
+                    var announcement = pendingAnnouncement;
+                    pendingAnnouncement = null;
+                    setTimeout(function() { playAnnouncement(announcement); }, 100);
+                }
             }
             function failed() {
                 if (finished) return;
                 finished = true;
                 clearTimeout(timeout);
-                audioProbeFailed = true;
-                setAudioMessage('تعذر تشغيل نغمة الاختبار. اضغط مرة أخرى لتجربة النداءات الصوتية.');
+                audioFailed();
             }
             player.onplay = ready;
             player.onerror = failed;
@@ -517,7 +500,8 @@
         function playAnnouncement(data) {
             if (!data.audio_url && !data.audio) return;
             if (!audioReady) {
-                setAudioMessage('اضغط لتفعيل النداءات الصوتية.');
+                pendingAnnouncement = data;
+                showAudioControl('تفعيل الصوت');
                 return;
             }
             if (data.announcement_id) {
@@ -759,6 +743,7 @@
             applyTokenZoom();
         };
         updateStatus(false);
+        unlockAudio();
         for (var i = 0; i < counterIds.length; i++) connectCounter(counterIds[i]);
         refreshData();
         setInterval(refreshData, 3000);

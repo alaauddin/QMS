@@ -109,6 +109,8 @@ class PublicScreenTests(TestCase):
         self.assertEqual([len(column) for column in columns], [8, 8])
         self.assertEqual(response.context["current_token"].number, 19)
         self.assertContains(response, 'id="token-display"')
+        self.assertContains(response, 'id="audio-control"')
+        self.assertNotContains(response, 'id="audio-overlay"')
         self.assertNotContains(response, 'id="publicAdCarousel"')
 
         data = self.client.get(
