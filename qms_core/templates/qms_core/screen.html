@@ -7,60 +7,340 @@
     <title>شاشة العرض</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        :root { --ink: #173c47; --muted: #617b83; --teal: #087e83; --teal-dark: #08646a; --line: #d9e8e9; --wash: #f1f8f8; }
         * { box-sizing: border-box; }
         html, body { margin: 0; min-height: 100%; }
-        body { font-family: 'Cairo', sans-serif; color: var(--ink); background: radial-gradient(circle at 85% 0%, #dcefed 0, transparent 34%), var(--wash); }
-        .screen-shell { min-height: 100dvh; padding: clamp(18px, 2.4vw, 40px); display: flex; flex-direction: column; gap: clamp(18px, 2vw, 30px); }
-        .screen-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; background: #fff; border: 1px solid var(--line); border-radius: 26px; padding: 16px clamp(22px, 2.4vw, 38px); box-shadow: 0 12px 35px rgba(29, 81, 89, .05); }
+        body {
+            font-family: 'Cairo', Tahoma, Arial, sans-serif;
+            color: #153840;
+            background: #edf3f2;
+        }
+        .screen-shell {
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .screen-header {
+            min-height: 88px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            padding: 13px 26px;
+            background: #fff;
+            border: 1px solid #dce9e7;
+            border-radius: 20px;
+            box-shadow: 0 5px 22px rgba(17, 56, 61, .045);
+        }
         .brand { display: flex; align-items: center; gap: 16px; min-width: 0; }
-        .brand-mark { flex: none; width: 62px; height: 62px; border-radius: 18px; background: #e5f4f1; color: var(--teal); font-size: 36px; font-weight: 900; line-height: 62px; text-align: center; }
-        .brand-logo { max-height: 62px; max-width: 160px; object-fit: contain; }
-        .brand-name { margin: 0; font-size: clamp(22px, 2vw, 34px); font-weight: 900; line-height: 1.25; }
-        .screen-name { margin: 2px 0 0; font-size: clamp(14px, 1.1vw, 19px); color: var(--muted); }
-        .status-badge { display: inline-flex; align-items: center; gap: 10px; background: #eff8f7; border: 1px solid #d1e8e5; border-radius: 999px; padding: 9px 16px; color: var(--teal-dark); font-size: 15px; font-weight: 800; white-space: nowrap; }
-        #status-indicator { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #de765f; box-shadow: 0 0 0 4px #f9e9e4; }
-        .screen-grid { display: flex; flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(400px, .7fr); gap: clamp(18px, 2vw, 30px); }
-        .panel { min-width: 0; background: #fff; border: 1px solid var(--line); border-radius: 30px; box-shadow: 0 14px 40px rgba(29, 81, 89, .06); }
-        .current-panel { flex: 1.3; display: flex; flex-direction: column; justify-content: space-between; align-items: center; text-align: center; overflow: hidden; padding: clamp(28px, 3vw, 55px); background: radial-gradient(circle at 50% 42%, #fff 0%, #f5fbfa 72%); }
-        .eyebrow { margin: 0 0 8px; color: var(--teal); font-size: clamp(17px, 1.5vw, 27px); font-weight: 800; }
-        .current-title { margin: 0; font-size: clamp(30px, 2.8vw, 50px); font-weight: 900; line-height: 1.25; }
-        .current-top { width: 100%; display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
-        .current-heading { flex: 1; text-align: center; }
-        .zoom-controls { display: flex; align-items: center; gap: 7px; flex: none; padding: 6px; border: 1px solid #c9e5df; border-radius: 16px; background: #e8f5f2; }
-        .zoom-button { width: 42px; height: 42px; border: 0; border-radius: 11px; background: #fff; color: #08646a; font: 900 28px/1 'Cairo', sans-serif; cursor: pointer; }
-        .zoom-button:focus-visible { outline: 3px solid #087e83; outline-offset: 2px; }
-        .zoom-level { min-width: 54px; color: #08646a; font-size: 15px; font-weight: 800; direction: ltr; text-align: center; }
-        .token-container { width: 100%; flex: 1; display: flex; align-items: center; justify-content: center; min-height: 210px; }
-        .token-number { max-width: 100%; margin: 0; font-size: 12rem; font-size: clamp(9rem, 18vw, 23rem); line-height: 1; font-weight: 900; color: var(--teal-dark); white-space: nowrap; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+        .brand-mark {
+            flex: none;
+            width: 58px;
+            height: 58px;
+            border-radius: 16px;
+            background: #0b6670;
+            color: #fff;
+            font: 900 40px/58px Arial, sans-serif;
+            text-align: center;
+        }
+        .brand-logo { max-width: 150px; max-height: 60px; object-fit: contain; }
+        .brand-name { margin: 0; font-size: 27px; font-weight: 900; line-height: 1.25; }
+        .screen-name { margin: 2px 0 0; color: #60787d; font-size: 16px; line-height: 1.3; }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            flex: none;
+            padding: 9px 16px;
+            border: 1px solid #cee6df;
+            border-radius: 999px;
+            background: #eef8f3;
+            color: #17614e;
+            font-size: 15px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        #status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #d46a56;
+            box-shadow: 0 0 0 4px #f8e7e1;
+        }
+        .screen-grid {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            gap: 18px;
+        }
+        .panel { min-width: 0; border-radius: 24px; overflow: hidden; }
+        .current-panel {
+            position: relative;
+            flex: 1.55;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            min-height: 0;
+            padding: 35px;
+            color: #fff;
+            background: #103c48;
+            background-image: radial-gradient(circle at 48% 38%, #215764 0, #103c48 66%);
+            box-shadow: 0 14px 35px rgba(11, 50, 59, .18);
+        }
+        .current-panel:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            height: 6px;
+            background: #8bdcc4;
+        }
+        .current-top {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 24px;
+            width: 100%;
+        }
+        .current-heading { text-align: right; }
+        .eyebrow {
+            display: inline-block;
+            margin: 0 0 8px;
+            padding: 5px 15px;
+            border: 1px solid rgba(160, 230, 212, .42);
+            border-radius: 999px;
+            color: #a8e6d4;
+            font-size: 16px;
+            font-weight: 800;
+            line-height: 1.5;
+        }
+        .current-title { margin: 0; font-size: 34px; font-weight: 900; line-height: 1.35; }
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: none;
+            padding: 5px;
+            border: 1px solid rgba(225, 247, 243, .26);
+            border-radius: 13px;
+            background: rgba(255, 255, 255, .10);
+        }
+        .zoom-button {
+            width: 42px;
+            height: 42px;
+            border: 0;
+            border-radius: 9px;
+            background: rgba(255, 255, 255, .16);
+            color: #fff;
+            font: 900 26px/1 Arial, sans-serif;
+            cursor: pointer;
+        }
+        .zoom-button:hover, .zoom-button:focus { background: rgba(255, 255, 255, .28); }
+        .zoom-button:focus { outline: 3px solid #a8e6d4; outline-offset: 2px; }
+        .zoom-level { min-width: 52px; color: #fff; font-size: 15px; font-weight: 800; direction: ltr; text-align: center; }
+        .token-container {
+            display: flex;
+            flex: 1;
+            align-items: center;
+            justify-content: center;
+            min-height: 170px;
+            width: 100%;
+            padding: 12px 0;
+        }
+        .token-number {
+            max-width: 100%;
+            margin: 0;
+            color: #fff;
+            font-size: 13rem;
+            font-size: clamp(9rem, 18vw, 23rem);
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -.045em;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+            text-shadow: 0 8px 32px rgba(0, 0, 0, .13);
+        }
         .token-number.new-token { animation: tokenPop .6s ease-out; }
-        @keyframes tokenPop { 0% { transform: scale(.76); opacity: .3; } 70% { transform: scale(1.04); } 100% { transform: scale(1); opacity: 1; } }
-        .counter-callout { width: 100%; display: flex; align-items: center; justify-content: center; gap: clamp(16px, 2vw, 36px); background: #e8f5f2; border: 1px solid #c9e5df; border-radius: 25px; padding: clamp(18px, 2vw, 32px); }
-        .instruction-text { font-size: clamp(23px, 2.2vw, 39px); font-weight: 800; line-height: 1.3; }
-        .counter-badge { background: var(--teal); color: white; border-radius: 19px; min-width: 100px; padding: 3px 20px; font-size: clamp(48px, 5vw, 88px); line-height: 1.2; font-weight: 900; font-variant-numeric: tabular-nums; }
-        .queue-panel { flex: .7; display: flex; flex-direction: column; padding: clamp(22px, 2vw, 36px); }
-        .queue-heading { margin-bottom: clamp(18px, 1.8vw, 28px); }
-        .queue-label { margin: 0 0 3px; color: var(--teal); font-size: 15px; font-weight: 800; }
-        .queue-title { margin: 0; font-size: clamp(27px, 2.3vw, 39px); font-weight: 900; line-height: 1.25; }
-        .issued-notice { margin: 0 0 14px; padding: 10px 15px; border: 1px solid #a9d9d1; border-radius: 14px; background: #e3f5ef; color: #08646a; font-size: 18px; font-weight: 800; text-align: center; }
+        @keyframes tokenPop {
+            0% { transform: scale(.78); opacity: .3; }
+            70% { transform: scale(1.04); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .counter-callout {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            width: 100%;
+            min-height: 124px;
+            padding: 17px 26px;
+            border-radius: 18px;
+            background: #a9ead7;
+            color: #103c48;
+        }
+        .instruction-text { font-size: 28px; font-weight: 900; line-height: 1.35; }
+        .counter-badge {
+            display: inline-block;
+            flex: none;
+            min-width: 102px;
+            padding: 0 18px;
+            border-radius: 13px;
+            background: #103c48;
+            color: #fff;
+            font-size: 66px;
+            font-weight: 900;
+            line-height: 1.28;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+        .queue-panel {
+            flex: .72;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            padding: 29px;
+            border: 1px solid #dce9e7;
+            background: #fff;
+            box-shadow: 0 8px 28px rgba(17, 56, 61, .07);
+        }
+        .queue-heading { flex: none; margin-bottom: 18px; padding-bottom: 17px; border-bottom: 1px solid #e1ebea; }
+        .queue-label { margin: 0 0 2px; color: #087e83; font-size: 15px; font-weight: 800; }
+        .queue-title { margin: 0; color: #153840; font-size: 30px; font-weight: 900; line-height: 1.3; }
+        .issued-notice {
+            flex: none;
+            margin: 0 0 12px;
+            padding: 8px 12px;
+            border: 1px solid #83d6b7;
+            border-radius: 10px;
+            background: #e5f8ed;
+            color: #17614e;
+            font-size: 16px;
+            font-weight: 800;
+            text-align: center;
+        }
         .issued-notice[hidden] { display: none; }
-        .issued-notice strong { margin: 0 8px; font-size: 24px; direction: ltr; }
-        .queue-token.new-issued { background: #d3f0df; border-color: #55b795; }
-        .queue-columns { display: flex; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; flex: 1; min-height: 0; }
-        .queue-column { width: 50%; display: block; display: grid; grid-template-rows: repeat(8, minmax(50px, 1fr)); gap: 10px; min-width: 0; }
-        .queue-token { display: flex; min-height: 50px; margin-bottom: 10px; align-items: center; justify-content: center; min-width: 0; background: #eef7f6; border: 1px solid #d5e9e6; border-radius: 14px; padding: 5px 8px; color: var(--teal-dark); font-size: clamp(25px, 2.3vw, 39px); line-height: 1.15; font-weight: 900; font-variant-numeric: tabular-nums; white-space: nowrap; }
-        .queue-placeholder { color: #b7d2d0; background: #f8fbfa; border-style: dashed; }
-        .queue-empty { margin: 14px 0 0; color: var(--muted); font-size: 16px; text-align: center; }
+        .issued-notice strong { margin: 0 6px; font-size: 20px; direction: ltr; }
+        .queue-columns {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            gap: 10px;
+        }
+        .queue-column {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            min-width: 0;
+            gap: 8px;
+        }
+        .queue-token {
+            display: flex;
+            flex: 1;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+            min-height: 42px;
+            padding: 2px 6px;
+            border: 1px solid #dfeae8;
+            border-right: 4px solid #74bdb5;
+            border-radius: 9px;
+            background: #f5f9f8;
+            color: #184b52;
+            font-size: 30px;
+            font-weight: 900;
+            line-height: 1.15;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+        .queue-token.new-issued { background: #d9f5e8; border-color: #55b795; }
+        .queue-placeholder { border-right-color: #dfeae8; background: #fbfcfc; color: #b7d2d0; }
+        .queue-empty { margin: 14px 0 0; color: #60787d; font-size: 16px; text-align: center; }
         .queue-empty[hidden] { display: none; }
-        @supports (display: grid) { .queue-token { margin-bottom: 0; } }
-        .audio-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(16, 49, 54, .84); cursor: pointer; }
-        .audio-card { max-width: 620px; width: 100%; background: #fff; border-radius: 30px; padding: clamp(32px, 4vw, 60px); text-align: center; box-shadow: 0 30px 80px rgba(0, 0, 0, .18); }
-        .audio-icon { width: 74px; height: 74px; margin: 0 auto 22px; display: grid; place-items: center; background: #e5f4f1; border-radius: 22px; color: var(--teal); font-size: 40px; }
-        .audio-title { margin: 0; font-size: clamp(27px, 2.4vw, 40px); font-weight: 900; }
-        .audio-hint { margin: 12px 0 28px; color: var(--muted); font-size: 20px; }
-        .start-button { display: inline-block; background: var(--teal); color: #fff; border: 0; border-radius: 16px; padding: 11px 38px; font-size: 23px; font-weight: 800; cursor: pointer; }
-        @media (max-width: 1050px) { .screen-grid { grid-template-columns: 1fr; } .current-panel { min-height: 520px; } .queue-token { min-height: 58px; font-size: 32px; } }
-        @media (max-width: 650px) { .screen-shell { padding: 12px; gap: 12px; } .screen-header, .panel { border-radius: 20px; } .screen-header { padding: 14px; } .brand-mark { width: 48px; height: 48px; line-height: 48px; font-size: 29px; } .brand-logo { max-height: 48px; max-width: 74px; } .brand-name { font-size: 20px; } .screen-name { font-size: 13px; } .status-badge { padding: 8px; font-size: 0; } .current-panel { min-height: 420px; padding: 22px; } .current-top { flex-direction: column; align-items: center; } .zoom-button { width: 38px; height: 38px; } .token-number { font-size: clamp(5rem, 20vw, 10rem); } .counter-callout { flex-wrap: wrap; } .instruction-text { font-size: 22px; } .counter-badge { font-size: 52px; } .queue-panel { padding: 18px; } .queue-columns { gap: 8px; } .queue-column { gap: 8px; } .queue-token { font-size: clamp(22px, 6vw, 30px); min-height: 52px; } }
+        .audio-overlay {
+            position: fixed;
+            top: 0; right: 0; bottom: 0; left: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(9, 38, 45, .86);
+            cursor: pointer;
+        }
+        .audio-card {
+            width: 100%;
+            max-width: 620px;
+            padding: 48px;
+            border-radius: 24px;
+            background: #fff;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, .18);
+        }
+        .audio-icon {
+            width: 74px;
+            height: 74px;
+            margin: 0 auto 22px;
+            border-radius: 20px;
+            background: #e5f4f1;
+            color: #087e83;
+            font-size: 40px;
+            line-height: 74px;
+            text-align: center;
+        }
+        .audio-title { margin: 0; font-size: 34px; font-weight: 900; }
+        .audio-hint { margin: 12px 0 28px; color: #60787d; font-size: 20px; }
+        .start-button {
+            display: inline-block;
+            padding: 11px 38px;
+            border: 0;
+            border-radius: 13px;
+            background: #087e83;
+            color: #fff;
+            font: 800 23px 'Cairo', Tahoma, Arial, sans-serif;
+            cursor: pointer;
+        }
+        @media (max-width: 1100px) {
+            .screen-grid { flex-direction: column; }
+            .current-panel { flex: none; min-height: 500px; }
+            .queue-panel { flex: none; min-height: 600px; }
+            .queue-token { min-height: 50px; }
+        }
+        @media (max-width: 650px) {
+            .screen-shell { padding: 10px; gap: 10px; }
+            .screen-header, .panel { border-radius: 16px; }
+            .screen-header { min-height: 70px; padding: 12px; }
+            .brand { gap: 9px; }
+            .brand-mark { width: 46px; height: 46px; border-radius: 12px; font-size: 32px; line-height: 46px; }
+            .brand-logo { max-width: 75px; max-height: 46px; }
+            .brand-name { font-size: 19px; }
+            .screen-name { font-size: 12px; }
+            .status-badge { padding: 8px; font-size: 0; }
+            .current-panel { min-height: 400px; padding: 21px; }
+            .current-top { align-items: flex-start; gap: 10px; }
+            .eyebrow { font-size: 12px; }
+            .current-title { font-size: 22px; }
+            .zoom-controls { gap: 3px; padding: 3px; }
+            .zoom-button { width: 32px; height: 32px; font-size: 22px; }
+            .zoom-level { min-width: 39px; font-size: 12px; }
+            .token-number { font-size: 6rem; font-size: clamp(5rem, 20vw, 10rem); }
+            .counter-callout { min-height: 80px; padding: 12px; gap: 8px; }
+            .instruction-text { font-size: 18px; }
+            .counter-badge { min-width: 64px; padding: 2px 10px; font-size: 40px; }
+            .queue-panel { min-height: 560px; padding: 18px; }
+            .queue-heading { margin-bottom: 12px; padding-bottom: 12px; }
+            .queue-title { font-size: 25px; }
+            .queue-columns { gap: 7px; }
+            .queue-column { gap: 7px; }
+            .queue-token { font-size: 24px; }
+            .audio-card { padding: 30px 20px; }
+            .audio-title { font-size: 27px; }
+        }
         @media (prefers-reduced-motion: reduce) { .token-number.new-token { animation: none; } }
     </style>
 </head>
