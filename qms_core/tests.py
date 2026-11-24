@@ -4,6 +4,7 @@ from unittest.mock import patch
 import hashlib
 import json
 import tempfile
+from datetime import timedelta
 from pathlib import Path
 from django.urls import reverse
 from django.utils import timezone
@@ -183,9 +184,6 @@ class ScreenAudioEventTests(TestCase):
         self.assertEqual(messages[0]["full_token"], "R21")
 
 
-@override_settings(CHANNEL_LAYERS={
-    "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
-})
 class RecallAnnouncementTests(TestCase):
     def test_each_recall_gets_a_new_announcement_id_for_screen_and_audio(self):
         user = User.objects.create_user(username="operator", password="test-password")
@@ -193,27 +191,37 @@ class RecallAnnouncementTests(TestCase):
         counter = Counter.objects.create(number=3)
         CounterAssignment.objects.create(user=user, counter=counter, is_active=True)
         screen = Screen.objects.create(name="Main lobby", device_token="main-lobby")
-        screen.counters.add(counter)
+        second_counter = Counter.objects.create(number=4)
+        screen.counters.add(counter, second_counter)
+        first_called_at = timezone.now() - timedelta(minutes=5)
         token = Token.objects.create(
             number=7, service=service, status="called",
-            counter=counter, called_at=timezone.now(),
+            counter=counter, called_at=first_called_at,
         )
-        layer = get_channel_layer()
-        channel = async_to_sync(layer.new_channel)()
-        async_to_sync(layer.group_add)("queue_updates", channel)
-        self.client.force_login(user)
+        Token.objects.create(
+            number=8, service=service, status="called",
+            counter=second_counter, called_at=timezone.now(),
+        )
+        events = []
 
+        def capture(group, event):
+            events.append((group, event))
+
+        self.client.force_login(user)
         ids = []
-        with patch("qms_core.views.threading.Thread") as worker:
+        with patch("qms_core.views.threading.Thread") as worker, \
+             patch("qms_core.views.get_channel_layer") as layer, \
+             patch("qms_core.views.async_to_sync", side_effect=lambda func: func):
+            layer.return_value.group_send = capture
             for _ in range(2):
                 response = self.client.get(reverse("qms_core:recall_token"))
                 self.assertEqual(response.status_code, 200)
                 self.assertTrue(response.json()["success"])
-                event = async_to_sync(layer.receive)(channel)
-                self.assertEqual(event["type"], "token_called")
-                self.assertEqual(event["token_id"], token.id)
-                self.assertEqual(async_to_sync(layer.receive)(channel)["type"], "queue_changed")
-                ids.append(event["announcement_id"])
+                self.assertEqual(events[-2][0], "queue_updates")
+                self.assertEqual(events[-2][1]["type"], "token_called")
+                self.assertEqual(events[-2][1]["token_id"], token.id)
+                self.assertEqual(events[-1][1]["type"], "queue_changed")
+                ids.append(events[-2][1]["announcement_id"])
                 self.assertEqual(
                     self.client.get(reverse("qms_core:api_get_screen_data", args=[screen.device_token]))
                     .json()["current_call"]["announcement_id"],
@@ -222,6 +230,13 @@ class RecallAnnouncementTests(TestCase):
 
         self.assertNotEqual(ids[0], ids[1])
         self.assertEqual(worker.call_count, 2)
-        self.assertEqual(worker.call_args.args[1]["args"][-1], ids[-1])
+        self.assertEqual(worker.call_args.kwargs["args"][-1], ids[-1])
         token.refresh_from_db()
         self.assertEqual(token.announcement_id, ids[-1])
+        self.assertEqual(token.called_at, first_called_at)
+        self.assertIsNotNone(token.announced_at)
+        self.assertEqual(
+            self.client.get(reverse("qms_core:public_screen", args=[screen.device_token]))
+            .context["current_token"].id,
+            token.id,
+        )

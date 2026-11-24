@@ -157,7 +157,8 @@ def broadcast_token_call(token, serving_counter):
     Broadcasts token update immediately, then generates audio in background.
     """
     token.announcement_id = uuid.uuid4().hex
-    token.save(update_fields=['announcement_id'])
+    token.announced_at = timezone.now()
+    token.save(update_fields=['announcement_id', 'announced_at'])
     channel_layer = get_channel_layer()
     
     # 1. Global Call Update (Visual)
@@ -648,7 +649,7 @@ def public_screen(request, device_token):
     current_token = (
         Token.objects.filter(counter__in=counters, status='called')
         .select_related('service', 'counter')
-        .order_by('-called_at', '-pk')
+        .order_by('-announced_at', '-called_at', '-pk')
         .first()
     )
 

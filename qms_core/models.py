@@ -67,6 +67,7 @@ class Token(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     called_at = models.DateTimeField(_("Called At"), null=True, blank=True)
     announcement_id = models.CharField(max_length=32, blank=True, default="")
+    announced_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(_("Completed At"), null=True, blank=True)
 
     def __str__(self):

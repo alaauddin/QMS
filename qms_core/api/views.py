@@ -156,7 +156,7 @@ def api_get_screen_data(request, device_token):
     current_call = (
         Token.objects.filter(counter__in=counters, status='called')
         .select_related('service', 'counter')
-        .order_by('-called_at', '-pk')
+        .order_by('-announced_at', '-called_at', '-pk')
         .first()
     )
 
