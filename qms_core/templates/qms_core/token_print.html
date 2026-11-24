@@ -63,7 +63,7 @@
 <body onload="setTimeout(() => window.print(), 300)">
     <div class="ticket-card">
         <div class="ticket-brand">
-            {% if system_config.logo %}<img class="ticket-logo" src="{{ system_config.logo.url }}" alt="{{ system_config.system_name }}">{% endif %}
+            {% if system_config.logo %}<img class="ticket-logo" src="{{ system_config.logo.url }}" alt="{% if system_config.system_name == 'QMS System' %}نظام انتظار المرضى{% else %}{{ system_config.system_name|default:'نظام انتظار المرضى' }}{% endif %}">{% endif %}
             <h2 class="org-name">{% if system_config.system_name == "QMS System" %}نظام انتظار المرضى{% else %}{{ system_config.system_name|default:"نظام انتظار المرضى" }}{% endif %}</h2>
         </div>
         <div class="prefix-badge">{{ token.service.prefix }}</div>

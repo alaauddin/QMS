@@ -87,6 +87,15 @@ class TokenCreationTests(TestCase):
         self.assertNotContains(response, 'class="queue-panel"')
         self.assertNotContains(response, 'id="adCarousel"')
 
+    def test_kiosk_interface_is_arabic(self):
+        response = self.client.get(reverse("qms_core:kiosk"))
+
+        self.assertContains(response, '<html lang="ar" dir="rtl">')
+        self.assertContains(response, "اختر الخدمة")
+        self.assertContains(response, "رقم تذكرتك")
+        self.assertNotContains(response, ">English<")
+        self.assertNotContains(response, "Choose a service")
+
     def test_web_and_mobile_issue_events_include_the_new_token(self):
         layer = get_channel_layer()
         channel = async_to_sync(layer.new_channel)()
