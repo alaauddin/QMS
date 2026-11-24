@@ -617,10 +617,14 @@ def kiosk(request):
             'ewt': ewt
         })
         
-    ads = Ads.objects.filter(is_active=True, show_in_kiosk=True)
+    queue_tokens = list(
+        Token.objects.filter(status='waiting')
+        .select_related('service')
+        .order_by('-is_priority', 'created_at', 'pk')[:16]
+    )
     return render(request, 'qms_core/kiosk.html', {
         'services_data': services_data,
-        'ads': ads,
+        'queue_columns': [queue_tokens[:8], queue_tokens[8:]],
     })
 
 @xframe_options_exempt

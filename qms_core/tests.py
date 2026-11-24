@@ -51,3 +51,17 @@ class TokenCreationTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Token.objects.count(), 1)
         self.assertEqual(response.json()["token"]["number"], 1)
+
+    def test_kiosk_shows_sixteen_waiting_tokens_in_two_columns(self):
+        for number in range(1, 18):
+            Token.objects.create(number=number, service=self.service, status="waiting")
+        Token.objects.create(number=18, service=self.service, status="waiting", is_priority=True)
+        Token.objects.create(number=19, service=self.service, status="called")
+
+        response = self.client.get(reverse("qms_core:kiosk"))
+        columns = response.context["queue_columns"]
+
+        self.assertEqual([len(column) for column in columns], [8, 8])
+        self.assertEqual(columns[0][0].number, 18)
+        self.assertNotIn(19, [token.number for column in columns for token in column])
+        self.assertNotContains(response, 'id="adCarousel"')
