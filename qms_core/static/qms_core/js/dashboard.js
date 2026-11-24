@@ -10,30 +10,72 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    // WebSocket setup
-    const wsUrl = (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + '/ws/counter/' + config.counterIds[0] + '/';
-    const ws = new WebSocket(wsUrl);
+    // Keep the queue current when a ticket is issued, even after a socket drop.
+    let socket = null;
+    let reconnectTimer = null;
+    let refreshTimer = null;
+    let latestDashboardRequest = 0;
 
-    ws.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-        console.log("WS Event:", data.type);
-
-        if (data.type === 'token_called') {
+    function scheduleDashboardRefresh() {
+        if (refreshTimer) clearTimeout(refreshTimer);
+        refreshTimer = setTimeout(() => {
+            refreshTimer = null;
             updateDashboardUI();
-            if (data.audio) playAnnouncement(data.audio);
-        } else if (data.type === 'token_audio') {
-            // Only play audio if it's for this counter
-            if (data.counter_id == config.counterIds[0]) {
+        }, 100);
+    }
+
+    function connectDashboardSocket() {
+        if (!window.WebSocket || !config.counterIds.length) return;
+        const wsUrl = (window.location.protocol === 'https:' ? 'wss://' : 'ws://') +
+            window.location.host + '/ws/counter/' + config.counterIds[0] + '/';
+        let connection;
+        try {
+            connection = new WebSocket(wsUrl);
+        } catch (error) {
+            scheduleReconnect();
+            return;
+        }
+        socket = connection;
+        connection.onopen = scheduleDashboardRefresh;
+        connection.onmessage = function(e) {
+            let data;
+            try {
+                data = JSON.parse(e.data);
+            } catch (error) {
+                return;
+            }
+
+            if (data.type === 'token_issued' || data.type === 'queue_changed' ||
+                data.type === 'token_called' || data.type === 'token_cleared') {
+                scheduleDashboardRefresh();
+            }
+            if (data.type === 'token_called' && data.audio) {
+                playAnnouncement(data.audio);
+            } else if (data.type === 'token_audio' &&
+                       config.counterIds.some(id => String(id) === String(data.counter_id)) &&
+                       data.audio) {
                 playAnnouncement(data.audio);
             }
-        } else if (data.type === 'queue_changed') {
-            updateDashboardUI();
-        }
-    };
+        };
+        connection.onclose = function() {
+            if (socket === connection) socket = null;
+            scheduleReconnect();
+        };
+        connection.onerror = function() {
+            connection.close();
+        };
+    }
 
-    ws.onclose = function() {
-        console.error('WebSocket connection lost');
-    };
+    function scheduleReconnect() {
+        if (reconnectTimer) return;
+        reconnectTimer = setTimeout(() => {
+            reconnectTimer = null;
+            connectDashboardSocket();
+        }, 3000);
+    }
+
+    connectDashboardSocket();
+    setInterval(updateDashboardUI, 15000);
 
     // Make functions globally available if needed by onclick handlers
     window.handleAction = handleAction;
@@ -51,10 +93,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateDashboardUI() {
-        fetch(config.urls.get_dashboard_data)
+        const requestId = ++latestDashboardRequest;
+        fetch(config.urls.get_dashboard_data, {cache: 'no-store'})
         .then(res => res.json())
         .then(data => {
-            if(data.error) return;
+            if (requestId !== latestDashboardRequest || data.error) return;
 
             // Update Stats
             document.getElementById('stat-waiting').innerText = data.stats.waiting;
@@ -130,7 +173,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 cSelect.innerHTML = `<option value="">${config.translations.any_counter}</option>` + 
                                   data.transfer_options.counters.map(c => `<option value="${c.id}">${config.translations.counter} ${c.number}</option>`).join('');
             }
-        });
+        })
+        .catch(error => console.error('Dashboard refresh failed:', error));
     }
 
     function resumeToken(tokenId) {
