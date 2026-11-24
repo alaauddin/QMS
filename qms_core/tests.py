@@ -1,7 +1,8 @@
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 
-from .models import Service, Token
+from .models import Counter, Screen, Service, Token
 
 
 @override_settings(CHANNEL_LAYERS={
@@ -65,3 +66,29 @@ class TokenCreationTests(TestCase):
         self.assertEqual(columns[0][0].number, 18)
         self.assertNotIn(19, [token.number for column in columns for token in column])
         self.assertNotContains(response, 'id="adCarousel"')
+
+
+class PublicScreenTests(TestCase):
+    def test_screen_shows_current_call_and_two_queue_columns_without_ads(self):
+        service = Service.objects.create(name="Registration", prefix="R")
+        counter = Counter.objects.create(number=3)
+        screen = Screen.objects.create(name="Main lobby", device_token="main-lobby")
+        screen.counters.add(counter)
+        for number in range(1, 19):
+            Token.objects.create(number=number, service=service, status="waiting")
+        Token.objects.create(
+            number=19, service=service, status="called",
+            counter=counter, called_at=timezone.now(),
+        )
+
+        response = self.client.get(reverse("qms_core:public_screen", args=[screen.device_token]))
+        columns = response.context["queue_columns"]
+        self.assertEqual([len(column) for column in columns], [8, 8])
+        self.assertEqual(response.context["current_token"].number, 19)
+        self.assertContains(response, 'id="token-display"')
+        self.assertNotContains(response, 'id="publicAdCarousel"')
+
+        data = self.client.get(
+            reverse("qms_core:api_get_screen_data", args=[screen.device_token])
+        ).json()
+        self.assertEqual(data["queue"], [f"R{number}" for number in range(1, 17)])

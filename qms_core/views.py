@@ -588,18 +588,34 @@ def get_dashboard_data(request):
         }
     })
 
+def get_waiting_queue_tokens():
+    """Return the first 16 waiting tickets in call order."""
+    return list(
+        Token.objects.filter(status='waiting')
+        .select_related('service')
+        .order_by('-is_priority', 'created_at', 'pk')[:16]
+    )
+
+
 def public_screen(request, device_token):
     """
     Public display screen.
     """
     screen = get_object_or_404(Screen, device_token=device_token, is_active=True)
     counters = screen.counters.all()
-    ads = Ads.objects.filter(is_active=True, public_screens=screen)
-    
+    queue_tokens = get_waiting_queue_tokens()
+    current_token = (
+        Token.objects.filter(counter__in=counters, status='called')
+        .select_related('service', 'counter')
+        .order_by('-called_at', '-pk')
+        .first()
+    )
+
     return render(request, 'qms_core/screen.html', {
         'screen': screen,
         'counters': counters,
-        'ads': ads,
+        'current_token': current_token,
+        'queue_columns': [queue_tokens[:8], queue_tokens[8:]],
     })
 
 def kiosk(request):
@@ -617,11 +633,7 @@ def kiosk(request):
             'ewt': ewt
         })
         
-    queue_tokens = list(
-        Token.objects.filter(status='waiting')
-        .select_related('service')
-        .order_by('-is_priority', 'created_at', 'pk')[:16]
-    )
+    queue_tokens = get_waiting_queue_tokens()
     return render(request, 'qms_core/kiosk.html', {
         'services_data': services_data,
         'queue_columns': [queue_tokens[:8], queue_tokens[8:]],

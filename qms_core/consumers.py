@@ -35,6 +35,7 @@ class CounterConsumer(AsyncWebsocketConsumer):
             'type': 'token_audio',
             'audio': event['audio'],
             'announcement_id': event['announcement_id'],
+            'counter_id': event.get('counter_id'),
         }))
 
     async def token_cleared(self, event):

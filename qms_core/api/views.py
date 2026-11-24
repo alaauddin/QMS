@@ -7,7 +7,7 @@ from django.template.loader import render_to_string
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from ..models import Token, Service, Ads, Counter, SystemConfig, Screen
-from ..views import get_service_wait_info
+from ..views import get_service_wait_info, get_waiting_queue_tokens
 
 @csrf_exempt
 def api_kiosk_data(request):
@@ -179,5 +179,6 @@ def api_get_screen_data(request, device_token):
         'screen_name': screen.name,
         'serving': serving_data,
         'recent': recent_data,
+        'queue': [str(token) for token in get_waiting_queue_tokens()],
         'ads': ads_data
     })
