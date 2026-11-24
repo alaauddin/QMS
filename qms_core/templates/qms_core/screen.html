@@ -1,4 +1,3 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -367,7 +366,7 @@
                     <button type="button" class="screen-zoom-button" onclick="changeScreenZoom(10)" aria-label="تكبير الشاشة">+</button>
                 </div>
                 <span class="status-badge"><span id="status-indicator"></span><span id="status-label">جاري الاتصال</span></span>
-                <button type="button" id="audio-control" class="audio-control" onclick="unlockAudio()" title="اضغط لتفعيل النداءات الصوتية">
+                <button type="button" id="audio-control" class="audio-control" onclick="unlockAudio()" title="اضغط لإعادة محاولة النداء الصوتي" hidden>
                     <span class="audio-control-icon" aria-hidden="true">♪</span><span id="audio-control-label">تفعيل الصوت</span>
                 </button>
             </div>
@@ -402,7 +401,6 @@
     <audio id="announcement-player" preload="none"></audio>
     <script>
         var queueUrl = "{% url 'qms_core:api_get_screen_data' screen.device_token %}";
-        var readySoundUrl = "{% static 'qms_core/audio/ready.wav' %}";
         var counterIds = [{% for counter in counters %}"{{ counter.id }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
         var counterNumbers = [{% for counter in counters %}"{{ counter.number }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
         var currentCallId = {% if current_token %}{{ current_token.id }}{% else %}0{% endif %};
@@ -428,9 +426,10 @@
         } catch (error) {}
         var activeConnections = {};
         var playedAnnouncements = {};
-        var audioReady = false;
         var pendingAnnouncement = null;
         var player = document.getElementById('announcement-player');
+        var playbackGeneration = 0;
+        var playbackTimer = null;
 
         function contains(values, value) {
             for (var i = 0; i < values.length; i++) {
@@ -459,55 +458,15 @@
             control.setAttribute('hidden', 'hidden');
         }
 
-        function audioFailed() {
-            audioReady = false;
-            showAudioControl('تفعيل الصوت');
-            document.getElementById('audio-control').title = 'تعذر تشغيل الصوت. اضغط لإعادة المحاولة.';
-        }
-
         function unlockAudio() {
-            var finished = false;
-            var timeout;
-            function ready() {
-                if (finished) return;
-                finished = true;
-                clearTimeout(timeout);
-                audioReady = true;
-                hideAudioControl();
-                player.onplay = null;
-                if (pendingAnnouncement) {
-                    var announcement = pendingAnnouncement;
-                    pendingAnnouncement = null;
-                    setTimeout(function() { playAnnouncement(announcement); }, 100);
-                }
-            }
-            function failed() {
-                if (finished) return;
-                finished = true;
-                clearTimeout(timeout);
-                audioFailed();
-            }
-            player.onplay = ready;
-            player.onerror = failed;
-            player.src = readySoundUrl;
-            timeout = setTimeout(failed, 2500);
-            try {
-                var result = player.play();
-                if (result && typeof result.then === 'function') {
-                    result.then(ready, failed);
-                }
-            } catch (error) {
-                failed();
-            }
+            if (!pendingAnnouncement) return;
+            var announcement = pendingAnnouncement;
+            pendingAnnouncement = null;
+            playAnnouncement(announcement);
         }
 
         function playAnnouncement(data) {
             if (!data.audio_url && !data.audio) return;
-            if (!audioReady) {
-                pendingAnnouncement = data;
-                showAudioControl('تفعيل الصوت');
-                return;
-            }
             if (data.announcement_id) {
                 if (playedAnnouncements[data.announcement_id]) return;
                 playedAnnouncements[data.announcement_id] = true;
@@ -515,34 +474,52 @@
                 return;
             }
 
-            var source = data.audio_url || ('data:audio/mpeg;base64,' + data.audio);
+            playbackGeneration++;
+            var generation = playbackGeneration;
+            clearTimeout(playbackTimer);
+            pendingAnnouncement = null;
+            hideAudioControl();
             var triedFallback = false;
-            player.onplay = function() {
+            var finished = false;
+            var sourceAttempt = 0;
+            function started(attempt) {
+                if (generation !== playbackGeneration || attempt !== sourceAttempt || finished) return;
+                finished = true;
+                clearTimeout(playbackTimer);
                 if (data.token_id) lastAnnouncedCallId = Number(data.token_id);
-                player.onplay = null;
-            };
-            player.onerror = function() {
+                hideAudioControl();
+            }
+            function failed(attempt) {
+                if (generation !== playbackGeneration || attempt !== sourceAttempt || finished) return;
+                clearTimeout(playbackTimer);
                 if (!triedFallback && data.audio && data.audio_url) {
                     triedFallback = true;
-                    player.src = 'data:audio/mpeg;base64,' + data.audio;
-                    tryPlay();
+                    startPlayback('data:audio/mpeg;base64,' + data.audio);
                 } else {
+                    finished = true;
                     if (data.announcement_id) delete playedAnnouncements[data.announcement_id];
-                    audioFailed();
+                    pendingAnnouncement = data;
+                    showAudioControl('إعادة تشغيل النداء');
+                    document.getElementById('audio-control').title = 'تعذر تشغيل الصوت. اضغط لإعادة المحاولة.';
                 }
-            };
-            function tryPlay() {
+            }
+            function startPlayback(source) {
+                sourceAttempt++;
+                var attempt = sourceAttempt;
+                player.onplay = function() { started(attempt); };
+                player.onerror = function() { failed(attempt); };
+                player.src = source;
+                playbackTimer = setTimeout(function() { failed(attempt); }, 6000);
                 try {
                     var result = player.play();
                     if (result && typeof result.then === 'function') {
-                        result.then(null, function() { player.onerror(); });
+                        result.then(function() { started(attempt); }, function() { failed(attempt); });
                     }
                 } catch (error) {
-                    player.onerror();
+                    failed(attempt);
                 }
             }
-            player.src = source;
-            tryPlay();
+            startPlayback(data.audio_url || ('data:audio/mpeg;base64,' + data.audio));
         }
 
         function applyScreenZoom() {
@@ -798,7 +775,6 @@
             applyTokenZoom();
         };
         updateStatus(false);
-        unlockAudio();
         for (var i = 0; i < counterIds.length; i++) connectCounter(counterIds[i]);
         refreshData();
         setInterval(refreshData, 3000);
