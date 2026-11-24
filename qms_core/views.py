@@ -170,6 +170,7 @@ def broadcast_token_call(token, serving_counter):
             'token': str(token.number),
             'token_id': token.id,
             'announcement_id': token.announcement_id,
+            'announcement_sequence': int(token.announced_at.timestamp() * 1000000),
             'service': token.service.prefix,
             'service_name': token.service.name,
             'counter': serving_counter.number,
@@ -416,7 +417,7 @@ def mark_token_done(request):
         async_to_sync(channel_layer.group_send)("queue_updates", {'type': 'queue_changed'})
         
         # Broadcast clear to counter group
-        async_to_sync(channel_layer.group_send)(f"counter_{token.counter.id}", {'type': 'token_cleared'})
+        async_to_sync(channel_layer.group_send)(f"counter_{token.counter.id}", {'type': 'token_cleared', 'token_id': token.id})
         
         return JsonResponse({'success': True})
     
@@ -442,7 +443,7 @@ def mark_token_no_show(request):
         
         # Broadcast clear to counter group
         if token.counter:
-            async_to_sync(channel_layer.group_send)(f"counter_{token.counter.id}", {'type': 'token_cleared'})
+            async_to_sync(channel_layer.group_send)(f"counter_{token.counter.id}", {'type': 'token_cleared', 'token_id': token.id})
         
         return JsonResponse({'success': True})
     
@@ -465,7 +466,7 @@ def hold_token(request):
         async_to_sync(channel_layer.group_send)("queue_updates", {'type': 'queue_changed'})
         
         # Broadcast clear to counter group
-        async_to_sync(channel_layer.group_send)(f"counter_{token.counter.id}", {'type': 'token_cleared'})
+        async_to_sync(channel_layer.group_send)(f"counter_{token.counter.id}", {'type': 'token_cleared', 'token_id': token.id})
         
         return JsonResponse({'success': True})
     return JsonResponse({'error': _('No active token to hold.')}, status=400)
@@ -525,7 +526,7 @@ def transfer_token(request):
     
     # Broadcast clear to the OLD counter group
     if old_counter_id:
-        async_to_sync(channel_layer.group_send)(f"counter_{old_counter_id}", {'type': 'token_cleared'})
+        async_to_sync(channel_layer.group_send)(f"counter_{old_counter_id}", {'type': 'token_cleared', 'token_id': token.id})
         
     return JsonResponse({'success': True})
 
@@ -652,11 +653,18 @@ def public_screen(request, device_token):
         .order_by('-announced_at', '-called_at', '-pk')
         .first()
     )
+    latest_announcement = (
+        Token.objects.filter(counter__in=counters, announced_at__isnull=False)
+        .order_by('-announced_at', '-pk')
+        .first()
+    )
 
     return render(request, 'qms_core/screen.html', {
         'screen': screen,
         'counters': counters,
         'current_token': current_token,
+        'latest_announcement': latest_announcement,
+        'latest_announcement_sequence': int(latest_announcement.announced_at.timestamp() * 1000000) if latest_announcement else 0,
         'latest_issued': latest_issued,
         'queue_columns': [queue_tokens[:8], queue_tokens[8:]],
     })

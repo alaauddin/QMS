@@ -406,6 +406,10 @@
         var counterIds = [{% for counter in counters %}"{{ counter.id }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
         var counterNumbers = [{% for counter in counters %}"{{ counter.number }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
         var currentCallId = {% if current_token %}{{ current_token.id }}{% else %}0{% endif %};
+        var lastSeenAnnouncementSequence = {{ latest_announcement_sequence }};
+        var lastSeenAnnouncementId = "{% if latest_announcement %}{{ latest_announcement.announcement_id }}{% endif %}";
+        var activeAudioAnnouncementId = '';
+        var pendingPollAnnouncementId = '';
         var lastAnnouncedCallId = 0;
         var lastIssuedTokenId = {% if latest_issued %}{{ latest_issued.id }}{% else %}0{% endif %};
         var lastIssuedFullToken = '';
@@ -599,13 +603,15 @@
             try { window.localStorage.setItem(zoomStorageKey, String(tokenZoom)); } catch (error) {}
         }
 
-        function updateDisplay(tokenText, counterNum) {
+        function updateDisplay(tokenText, counterNum, animate) {
             var tokenDisplay = document.getElementById('token-display');
             while (tokenDisplay.firstChild) tokenDisplay.removeChild(tokenDisplay.firstChild);
             tokenDisplay.appendChild(document.createTextNode(englishDigits(tokenText)));
             tokenDisplay.className = 'token-number';
-            tokenDisplay.offsetWidth;
-            tokenDisplay.className = 'token-number new-token';
+            if (animate) {
+                tokenDisplay.offsetWidth;
+                tokenDisplay.className = 'token-number new-token';
+            }
             var counterDisplay = document.getElementById('counter-badge');
             while (counterDisplay.firstChild) counterDisplay.removeChild(counterDisplay.firstChild);
             counterDisplay.appendChild(document.createTextNode(englishDigits(counterNum)));
@@ -629,14 +635,34 @@
                 var data;
                 try { data = JSON.parse(event.data); } catch (error) { return; }
                 if (data.type === 'token_called' && contains(counterNumbers, data.counter)) {
-                    updateDisplay(data.service + data.token, data.counter);
+                    if (data.announcement_id === lastSeenAnnouncementId &&
+                        Number(data.token_id) === Number(currentCallId)) return;
+                    var sequence = Number(data.announcement_sequence) || 0;
+                    if (sequence && sequence < lastSeenAnnouncementSequence) return;
+                    if (sequence) lastSeenAnnouncementSequence = sequence;
+                    lastSeenAnnouncementId = data.announcement_id || '';
+                    activeAudioAnnouncementId = lastSeenAnnouncementId;
+                    pendingPollAnnouncementId = lastSeenAnnouncementId;
+                    updateDisplay(data.service + data.token, data.counter, true);
                     if (data.token_id) currentCallId = Number(data.token_id);
-                    if (data.audio || data.audio_url) playAnnouncement(data);
+                    if (data.audio || data.audio_url) {
+                        playAnnouncement(data);
+                        pendingPollAnnouncementId = '';
+                    }
                 } else if (data.type === 'token_audio' && contains(counterIds, data.counter_id)) {
-                    playAnnouncement(data);
+                    if (data.announcement_id && data.announcement_id === activeAudioAnnouncementId) {
+                        playAnnouncement(data);
+                        pendingPollAnnouncementId = '';
+                    }
                 } else if (data.type === 'token_cleared') {
-                    updateDisplay('--', '--');
-                    currentCallId = 0;
+                    if (Number(data.token_id) === Number(currentCallId)) {
+                        if (pendingAnnouncement && Number(pendingAnnouncement.token_id) === Number(data.token_id)) pendingAnnouncement = null;
+                        activeAudioAnnouncementId = '';
+                        pendingPollAnnouncementId = '';
+                        updateDisplay('--', '--', false);
+                        currentCallId = 0;
+                    }
+                    refreshData();
                 } else if (data.type === 'token_issued') {
                     handleIssuedToken(data);
                 } else if (data.type === 'queue_changed') {
@@ -714,6 +740,21 @@
                 if (request.readyState !== 4 || request.status !== 200) return;
                 var data;
                 try { data = JSON.parse(request.responseText); } catch (error) { return; }
+                var latest = data.latest_announcement;
+                var latestSequence = latest ? Number(latest.sequence) : 0;
+                if (latestSequence && latestSequence < lastSeenAnnouncementSequence) return;
+                var newAnnouncement = latestSequence > lastSeenAnnouncementSequence;
+                if (newAnnouncement) {
+                    lastSeenAnnouncementSequence = latestSequence;
+                    lastSeenAnnouncementId = latest.id;
+                    if (data.current_call && data.current_call.announcement_id === latest.id) {
+                        activeAudioAnnouncementId = latest.id;
+                        pendingPollAnnouncementId = latest.id;
+                    } else {
+                        activeAudioAnnouncementId = '';
+                        pendingPollAnnouncementId = '';
+                    }
+                }
                 if (data.latest_issued && Number(data.latest_issued.id) > Number(lastIssuedTokenId)) {
                     lastIssuedTokenId = Number(data.latest_issued.id);
                     showIssuedNotice(data.latest_issued.full_token);
@@ -721,16 +762,30 @@
                 renderQueue(data.queue || []);
                 if (data.current_call) {
                     var call = data.current_call;
-                    if (Number(call.id) !== Number(currentCallId)) {
-                        updateDisplay(call.full_token, call.counter_number);
+                    var isExplicitCall = newAnnouncement && call.announcement_id === latest.id;
+                    if (Number(call.id) !== Number(currentCallId) || isExplicitCall) {
+                        updateDisplay(call.full_token, call.counter_number, isExplicitCall);
                         currentCallId = Number(call.id);
                     }
-                    if (call.audio_url && (!call.announcement_id || !playedAnnouncements[call.announcement_id])) {
-                        playAnnouncement({audio_url: call.audio_url, token_id: call.id, announcement_id: call.announcement_id});
+                    if (activeAudioAnnouncementId && call.announcement_id !== activeAudioAnnouncementId) {
+                        activeAudioAnnouncementId = '';
+                        pendingPollAnnouncementId = '';
+                        if (pendingAnnouncement && pendingAnnouncement.announcement_id !== call.announcement_id) pendingAnnouncement = null;
                     }
-                } else if (currentCallId) {
-                    updateDisplay('--', '--');
+                    if (pendingPollAnnouncementId && call.announcement_id === pendingPollAnnouncementId) {
+                        if (playedAnnouncements[pendingPollAnnouncementId]) {
+                            pendingPollAnnouncementId = '';
+                        } else if (call.audio_url) {
+                            playAnnouncement({audio_url: call.audio_url, token_id: call.id, announcement_id: call.announcement_id});
+                            pendingPollAnnouncementId = '';
+                        }
+                    }
+                } else {
+                    if (currentCallId) updateDisplay('--', '--', false);
                     currentCallId = 0;
+                    activeAudioAnnouncementId = '';
+                    pendingPollAnnouncementId = '';
+                    pendingAnnouncement = null;
                 }
             };
             request.send(null);

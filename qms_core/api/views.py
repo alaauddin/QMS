@@ -159,6 +159,11 @@ def api_get_screen_data(request, device_token):
         .order_by('-announced_at', '-called_at', '-pk')
         .first()
     )
+    latest_announcement = (
+        Token.objects.filter(counter__in=counters, announced_at__isnull=False)
+        .order_by('-announced_at', '-pk')
+        .first()
+    )
 
     # Get last 5 called tokens for this screen's counters
     recent_tokens = Token.objects.filter(
@@ -189,6 +194,10 @@ def api_get_screen_data(request, device_token):
             'id': latest_issued.id,
             'full_token': str(latest_issued),
         } if latest_issued else None,
+        'latest_announcement': {
+            'id': latest_announcement.announcement_id,
+            'sequence': int(latest_announcement.announced_at.timestamp() * 1000000),
+        } if latest_announcement else None,
         'current_call': {
             'id': current_call.id,
             'announcement_id': current_call.announcement_id,

@@ -27,6 +27,7 @@ class CounterConsumer(AsyncWebsocketConsumer):
             'token': event['token'],
             'token_id': event.get('token_id'),
             'announcement_id': event.get('announcement_id'),
+            'announcement_sequence': event.get('announcement_sequence'),
             'service': event['service'],
             'counter': event['counter'],
             'audio': event.get('audio')
@@ -52,7 +53,8 @@ class CounterConsumer(AsyncWebsocketConsumer):
 
     async def token_cleared(self, event):
         await self.send(text_data=json.dumps({
-            'type': 'token_cleared'
+            'type': 'token_cleared',
+            'token_id': event.get('token_id'),
         }))
 
     async def queue_changed(self, event):

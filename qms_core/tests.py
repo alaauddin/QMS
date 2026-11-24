@@ -119,6 +119,49 @@ class PublicScreenTests(TestCase):
         self.assertEqual(data["queue"], [f"R{number}" for number in range(1, 17)])
         self.assertEqual(data["latest_issued"]["full_token"], "R19")
 
+    def test_finishing_newer_counter_does_not_turn_older_call_into_new_announcement(self):
+        service = Service.objects.create(name="Registration", prefix="R")
+        first_counter = Counter.objects.create(number=1)
+        second_counter = Counter.objects.create(number=2)
+        screen = Screen.objects.create(name="Main lobby", device_token="main-lobby")
+        screen.counters.add(first_counter, second_counter)
+        first_call = Token.objects.create(
+            number=1, service=service, status="called", counter=first_counter,
+            called_at=timezone.now() - timedelta(minutes=5),
+            announced_at=timezone.now() - timedelta(minutes=5),
+            announcement_id="first-call",
+        )
+        second_call = Token.objects.create(
+            number=2, service=service, status="called", counter=second_counter,
+            called_at=timezone.now() - timedelta(minutes=1),
+            announced_at=timezone.now() - timedelta(minutes=1),
+            announcement_id="second-call",
+        )
+        user = User.objects.create_user(username="second-operator", password="test-password")
+        CounterAssignment.objects.create(user=user, counter=second_counter, is_active=True)
+        self.client.force_login(user)
+        events = []
+
+        def capture(group, event):
+            events.append((group, event))
+
+        with patch("qms_core.views.get_channel_layer") as layer, \
+             patch("qms_core.views.async_to_sync", side_effect=lambda func: func):
+            layer.return_value.group_send = capture
+            self.assertEqual(self.client.get(reverse("qms_core:mark_token_done")).status_code, 200)
+
+        second_call.refresh_from_db()
+        self.assertEqual(second_call.status, "done")
+        self.assertEqual(events[-1][1]["type"], "token_cleared")
+        self.assertEqual(events[-1][1]["token_id"], second_call.id)
+
+        data = self.client.get(
+            reverse("qms_core:api_get_screen_data", args=[screen.device_token])
+        ).json()
+        self.assertEqual(data["current_call"]["id"], first_call.id)
+        self.assertEqual(data["latest_announcement"]["id"], second_call.announcement_id)
+        self.assertGreater(data["latest_announcement"]["sequence"], 0)
+
     def test_screen_api_exposes_cached_mp3_url_for_current_call(self):
         service = Service.objects.create(name="Registration", prefix="R")
         counter = Counter.objects.create(number=3)
