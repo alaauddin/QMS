@@ -7,6 +7,7 @@ class Service(models.Model):
     prefix = models.CharField(_("Token Prefix"), max_length=5)
     description = models.TextField(_("Service Description"), null=True, blank=True)
     icon_class = models.CharField(_("Icon Class"), max_length=50, default="fas fa-concierge-bell")
+    is_visible_on_kiosk = models.BooleanField(_("Show on Kiosk"), default=True)
 
     def __str__(self):
         return self.name
@@ -60,6 +61,7 @@ class Token(models.Model):
         ('hold', _('On Hold')),
         ('done', _('Done')),
         ('skipped', _('Skipped')),
+        ('no_show', _('Did Not Show Up')),
     ]
     status = models.CharField(_("Status"), max_length=20, choices=STATUS_CHOICES, default='waiting')
     is_priority = models.BooleanField(_("Is Priority"), default=False)

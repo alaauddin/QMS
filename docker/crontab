@@ -1,0 +1,13 @@
+# QMS daily end-of-day no-show marker
+# Runs every night at midnight (Asia/Riyadh) and marks all still-pending
+# tickets (status=waiting) as "Did Not Show Up" (status=no_show).
+#
+# Install (host): crontab docker/crontab
+# Install (Docker): mount to /etc/cron.d/qms-no-shows in a cron sidecar
+#                   container sharing the app volume, with TZ=Asia/Riyadh.
+
+CRON_TZ=Asia/Riyadh
+SHELL=/bin/sh
+PATH=/usr/local/bin:/usr/bin:/bin
+
+0 0 * * * qms python /app/manage.py mark_daily_no_shows >> /proc/1/fd/1 2>&1

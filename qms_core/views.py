@@ -672,20 +672,10 @@ def public_screen(request, device_token):
 def kiosk(request):
     """
     Kiosk interface for token generation.
+    Only services marked as visible on the kiosk are shown.
     """
-    all_services = Service.objects.all()
-    services_data = []
-    
-    for s in all_services:
-        waiting_count, ewt = get_service_wait_info(s)
-        services_data.append({
-            'obj': s,
-            'waiting_count': waiting_count,
-            'ewt': ewt
-        })
-        
     return render(request, 'qms_core/kiosk.html', {
-        'services_data': services_data,
+        'services': Service.objects.filter(is_visible_on_kiosk=True),
     })
 
 @xframe_options_exempt
@@ -694,8 +684,13 @@ def take_token(request, service_id):
     """
     Logic for generating a new token for a customer.
     Numbers are unique globally for the day across all services.
+    Services hidden on the kiosk cannot issue new tokens here
+    (they can still receive transferred tokens).
     """
     service = get_object_or_404(Service, id=service_id)
+
+    if not service.is_visible_on_kiosk:
+        return JsonResponse({'error': _('This service is not available on the kiosk.')}, status=403)
     
     # Get the last token number created today (local time) across ALL services
     from django.utils import timezone
